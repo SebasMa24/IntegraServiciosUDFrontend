@@ -1,0 +1,16 @@
+/* Asegura que el contenedor principal ocupe al menos el 100% del viewport */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Viewport Height completo */
+}
+
+/* El contenido principal crece para empujar el footer hacia abajo */
+.content-wrap {
+  flex: 1;
+}
+
+/* Opcional: Ajusta el footer para que no tenga margen inferior */
+footer {
+  margin-top: auto; /* Lo empuja hacia abajo */
+}

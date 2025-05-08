@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "target": "ES6",
+    "module": "ES6"
+  }
+}
