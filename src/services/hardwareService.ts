@@ -124,3 +124,29 @@ export async function getAvailableHardware(options: RequestOptions = {}): Promis
         throw new Error(`Error parsing JSON response: ${error}`);
     }
 }
+
+export async function getReservedHardwareDetails(hardwareId: bigint): Promise<any> {
+    // Make the GET request to the API
+    const REQUEST_URL = `${GET_REQUEST_MAPPING}/${hardwareId}`;
+    const response = await fetch(
+            REQUEST_URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${getToken()}`,
+                },
+            }
+        );
+
+    // If the response is not ok, throw an error.
+    if (!response.ok) {
+        throw new Error(`Error fetching reserved hardware details: ${response.statusText}`);
+    }
+
+    // Parse the JSON response and return it
+    try {
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Error parsing JSON response: ${error}`);
+    }
+}
