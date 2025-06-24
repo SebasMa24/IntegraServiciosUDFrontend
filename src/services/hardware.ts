@@ -71,3 +71,56 @@ export async function getHardwareHistory(options: RequestOptions = {}): Promise<
         throw new Error(`Error parsing JSON response: ${error}`);
     }
 }
+
+export async function getAvailableHardware(options: RequestOptions = {}): Promise<any> {
+    // Extract options with default values
+    const {
+        nameLike,
+        type,
+        building,
+        startDate,
+        endDate,
+        getAll,
+        qSize,
+        qPage,
+        orderBy,
+        ascOrder
+    } = options;
+
+    // Construct the parameters for the request
+    const params = new URLSearchParams();
+    if (nameLike) params.append("nameLike", nameLike);
+    if (type) params.append("type", type);
+    if (building !== undefined) params.append("building", building.toString());
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
+    if (getAll !== undefined) params.append("getAll", getAll.toString());
+    if (qSize !== undefined) params.append("qSize", qSize.toString());
+    if (qPage !== undefined) params.append("qPage", qPage.toString());
+    if (orderBy) params.append("orderBy", orderBy);
+    if (ascOrder !== undefined) params.append("ascOrder", ascOrder.toString());
+
+    // Make the GET request to the API
+    const REQUEST_URL = `${GET_REQUEST_MAPPING}/availability?${params.toString()}`;
+    const response = await fetch(
+            REQUEST_URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${getToken()}`,
+                },
+            }
+        );
+
+    // If the response is not ok, throw an error.
+    if (!response.ok) {
+        throw new Error(`Error fetching available hardware: ${response.statusText}`);
+    }
+
+    // Parse the JSON response and return it
+    try {
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Error parsing JSON response: ${error}`);
+    }
+}
