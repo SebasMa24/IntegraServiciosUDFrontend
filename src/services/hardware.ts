@@ -1,22 +1,39 @@
 import { getToken } from "./auth";
 
-const REQUEST_MAPPING =
+const GET_REQUEST_MAPPING =
     (import.meta.env.VITE_QUERY_API_URL || 'http://localhost:8082') +
     '/' + (import.meta.env.VITE_OPERATION_QUERIES_REQUEST_MAPPING || 'api/operations') +
     '/hardware';
 
-export async function getHardwareHistory(
-    email: string | undefined = undefined,
-    nameLike: string | undefined = undefined,
-    type: string | undefined = undefined,
-    building: number | undefined = undefined,
-    startDate: string | undefined = undefined,
-    endDate: string | undefined = undefined,
-    qSize: number | undefined = undefined,
-    qPage: number | undefined = undefined,
-    orderBy: string | undefined = undefined,
-    ascOrder: boolean | undefined = undefined
-): Promise<any> {
+interface RequestOptions {
+    email?: string;
+    nameLike?: string;
+    type?: string;
+    building?: number;
+    startDate?: string;
+    endDate?: string;
+    getAll?: boolean;
+    qSize?: number;
+    qPage?: number;
+    orderBy?: string;
+    ascOrder?: boolean;
+}
+
+export async function getHardwareHistory(options: RequestOptions = {}): Promise<any> {
+    // Extract options with default values
+    const {
+        email,
+        nameLike,
+        type,
+        building,
+        startDate,
+        endDate,
+        qSize,
+        qPage,
+        orderBy,
+        ascOrder
+    } = options;
+
     // Construct the parameters for the request
     const params = new URLSearchParams();
     if (email) params.append("email", email);
@@ -31,7 +48,7 @@ export async function getHardwareHistory(
     if (ascOrder !== undefined) params.append("ascOrder", ascOrder.toString());
 
     // Make the GET request to the API
-    const REQUEST_URL = `${REQUEST_MAPPING}?${params.toString()}`;
+    const REQUEST_URL = `${GET_REQUEST_MAPPING}?${params.toString()}`;
     const response = await fetch(
             REQUEST_URL, {
                 method: "GET",
