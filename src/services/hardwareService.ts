@@ -20,32 +20,13 @@ interface RequestOptions {
 }
 
 export async function getReservedHardwareHistory(options: RequestOptions = {}): Promise<any> {
-    // Extract options with default values
-    const {
-        email,
-        nameLike,
-        type,
-        building,
-        startDate,
-        endDate,
-        qSize,
-        qPage,
-        orderBy,
-        ascOrder
-    } = options;
-
     // Construct the parameters for the request
     const params = new URLSearchParams();
-    if (email) params.append("email", email);
-    if (nameLike) params.append("nameLike", nameLike);
-    if (type) params.append("type", type);
-    if (building !== undefined) params.append("building", building.toString());
-    if (startDate) params.append("startDate", startDate);
-    if (endDate) params.append("endDate", endDate);
-    if (qSize !== undefined) params.append("qSize", qSize.toString());
-    if (qPage !== undefined) params.append("qPage", qPage.toString());
-    if (orderBy) params.append("orderBy", orderBy);
-    if (ascOrder !== undefined) params.append("ascOrder", ascOrder.toString());
+    for (const [key, value] of Object.entries(options)) {
+        if (value !== undefined) {
+            params.append(key, value.toString());
+        }
+    }
 
     // Make the GET request to the API
     const REQUEST_URL = `${GET_REQUEST_MAPPING}?${params.toString()}`;
@@ -73,32 +54,13 @@ export async function getReservedHardwareHistory(options: RequestOptions = {}): 
 }
 
 export async function getAvailableHardware(options: RequestOptions = {}): Promise<any> {
-    // Extract options with default values
-    const {
-        nameLike,
-        type,
-        building,
-        startDate,
-        endDate,
-        getAll,
-        qSize,
-        qPage,
-        orderBy,
-        ascOrder
-    } = options;
-
     // Construct the parameters for the request
     const params = new URLSearchParams();
-    if (nameLike) params.append("nameLike", nameLike);
-    if (type) params.append("type", type);
-    if (building !== undefined) params.append("building", building.toString());
-    if (startDate) params.append("startDate", startDate);
-    if (endDate) params.append("endDate", endDate);
-    if (getAll !== undefined) params.append("getAll", getAll.toString());
-    if (qSize !== undefined) params.append("qSize", qSize.toString());
-    if (qPage !== undefined) params.append("qPage", qPage.toString());
-    if (orderBy) params.append("orderBy", orderBy);
-    if (ascOrder !== undefined) params.append("ascOrder", ascOrder.toString());
+    for (const [key, value] of Object.entries(options)) {
+        if (value !== undefined) {
+            params.append(key, value.toString());
+        }
+    }
 
     // Make the GET request to the API
     const REQUEST_URL = `${GET_REQUEST_MAPPING}/availability?${params.toString()}`;
