@@ -1,10 +1,21 @@
 import { getToken } from "./auth";
 
+/**
+ * Request mapping for hardware operation queries.
+ * 
+ * @author Nicolás Sabogal
+ */
 const GET_REQUEST_MAPPING =
     (import.meta.env.VITE_QUERY_API_URL || 'http://localhost:8082') +
     '/' + (import.meta.env.VITE_OPERATION_QUERIES_REQUEST_MAPPING || 'api/operations') +
     '/hardware';
 
+/**
+ * Interface for request options when fetching hardware data.
+ * This interface defines the parameters that can be used to filter and paginate the results.
+ * 
+ * @author Nicolás Sabogal
+ */
 interface RequestOptions {
     email?: string;
     nameLike?: string;
@@ -19,6 +30,14 @@ interface RequestOptions {
     ascOrder?: boolean;
 }
 
+/**
+ * Fetches the history of reserved hardware.
+ * 
+ * @param options - Optional parameters to filter and paginate the results. See {@link RequestOptions} for details.
+ * @returns A promise that resolves to the reserved hardware history data.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
 export async function getReservedHardwareHistory(options: RequestOptions = {}): Promise<any> {
     // Construct the parameters for the request
     const params = new URLSearchParams();
@@ -53,6 +72,14 @@ export async function getReservedHardwareHistory(options: RequestOptions = {}): 
     }
 }
 
+/**
+ * Fetches the available hardware.
+ * 
+ * @param options - Optional parameters to filter and paginate the results. See {@link RequestOptions} for details.
+ * @returns A promise that resolves to the available hardware data.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
 export async function getAvailableHardware(options: RequestOptions = {}): Promise<any> {
     // Construct the parameters for the request
     const params = new URLSearchParams();
@@ -87,6 +114,14 @@ export async function getAvailableHardware(options: RequestOptions = {}): Promis
     }
 }
 
+/**
+ * Fetches the details of a reserved hardware item by its ID.
+ * 
+ * @param hardwareId - The ID of the reserved hardware item.
+ * @returns A promise that resolves to the details of the reserved hardware.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
 export async function getReservedHardwareDetails(hardwareId: bigint): Promise<any> {
     // Make the GET request to the API
     const REQUEST_URL = `${GET_REQUEST_MAPPING}/${hardwareId}`;

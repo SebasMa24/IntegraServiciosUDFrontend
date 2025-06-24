@@ -1,10 +1,21 @@
 import { getToken } from './auth';
 
+/**
+ * Request mapping for space operation queries.
+ * 
+ * @author Nicolás Sabogal
+ */
 const GET_REQUEST_MAPPING =
     (import.meta.env.VITE_QUERY_API_URL || 'http://localhost:8082') +
     '/' + (import.meta.env.VITE_OPERATION_QUERIES_REQUEST_MAPPING || 'api/operations') +
     '/space';
 
+/**
+ * Interface for request options when fetching space data.
+ * This interface defines the parameters that can be used to filter and paginate the results.
+ * 
+ * @author Nicolás Sabogal
+ */
 interface RequestOptions {
     email?: string;
     nameLike?: string;
@@ -20,6 +31,14 @@ interface RequestOptions {
     ascOrder?: boolean;
 }
 
+/**
+ * Fetches the history of reserved spaces.
+ * 
+ * @param options - Optional parameters to filter and paginate the results. See {@link RequestOptions} for details.
+ * @returns A promise that resolves to the reserved space history data.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
 export async function getReservedSpaceHistory(options: RequestOptions = {}): Promise<any> {
     // Construct the parameters for the request
     const params = new URLSearchParams();
@@ -49,6 +68,14 @@ export async function getReservedSpaceHistory(options: RequestOptions = {}): Pro
     return response.json();
 }
 
+/**
+ * Fetches the available spaces.
+ * 
+ * @param options - Optional parameters to filter and paginate the results. See {@link RequestOptions} for details.
+ * @returns A promise that resolves to the available spaces data.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
 export async function getAvailableSpaces(options: RequestOptions = {}): Promise<any> {
     // Construct the parameters for the request
     const params = new URLSearchParams();
@@ -78,6 +105,14 @@ export async function getAvailableSpaces(options: RequestOptions = {}): Promise<
     return response.json();
 }
 
+/**
+ * Fetches the details of a reserved space by its ID.
+ * 
+ * @param spaceId - The ID of the reserved space to fetch details for.
+ * @returns A promise that resolves to the reserved space details data.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
 export async function getReservedSpaceDetails(spaceId: bigint): Promise<any> {
     // Make the GET request to the API
     const REQUEST_URL = `${GET_REQUEST_MAPPING}/${spaceId}`;
