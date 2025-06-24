@@ -1,13 +1,32 @@
 import { getToken } from './auth';
 
+/**
+ * Request options interface for user, operation, query, and resource management.
+ * This interface defines the structure of the options that can be passed to the request functions.
+ * The requestName is an optional string that can be used to identify the request in error messages or logs.
+ * The endpoint specifies the API endpoint to call (ignore the host part, which is defined in the request functions).
+ * The method specifies the HTTP method to use (GET, POST, PUT, DELETE).
+ * The params object can be used to pass query parameters to the request as a key-value pair object.
+ * The body object can be used to pass the request body as a key-value pair object.
+ * 
+ * @author Nicolás Sabogal
+ */
 interface RequestOptions {
+    requestName?: string;
     endpoint: string;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
     params?: Record<string, any>;
     body?: Record<string, any>;
-    requestName?: string;
 };
 
+/**
+ * Makes a request to the user management API.
+ * 
+ * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
+ * @author Nicolás Sabogal
+ */
 export async function userMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
@@ -15,6 +34,14 @@ export async function userMgmtRequest(
     return request(baseUrl, options);
 };
 
+/**
+ * Makes a request to the operation management API.
+ * 
+ * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
+ * @author Nicolás Sabogal
+ */
 export async function operationMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
@@ -22,6 +49,14 @@ export async function operationMgmtRequest(
     return request(baseUrl, options);
 };
 
+/**
+ * Makes a request to the queries management API.
+ * 
+ * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
+ * @author Nicolás Sabogal
+ */
 export async function queriesMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
@@ -29,6 +64,14 @@ export async function queriesMgmtRequest(
     return request(baseUrl, options);
 };
 
+/**
+ * Makes a request to the resource management API.
+ * 
+ * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
+ * @author Nicolás Sabogal
+ */
 export async function resourceMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
@@ -36,6 +79,15 @@ export async function resourceMgmtRequest(
     return request(baseUrl, options);
 };
 
+/**
+ * Makes a generic request to the specified base URL with the given options.
+ * 
+ * @param baseUrl - The base URL of the API to call.
+ * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
+ * @author Nicolás Sabogal
+ */
 async function request(
     baseUrl: string,
     options: RequestOptions
