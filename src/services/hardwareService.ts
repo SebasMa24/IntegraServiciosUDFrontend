@@ -19,7 +19,7 @@ interface RequestOptions {
     ascOrder?: boolean;
 }
 
-export async function getHardwareHistory(options: RequestOptions = {}): Promise<any> {
+export async function getReservedHardwareHistory(options: RequestOptions = {}): Promise<any> {
     // Extract options with default values
     const {
         email,
