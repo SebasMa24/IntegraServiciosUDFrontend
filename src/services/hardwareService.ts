@@ -24,7 +24,7 @@ export interface RequestOptions {
     endDate?: string;
     getAll?: boolean;       // Only for available hardware
     isHandedOver?: boolean; // Only for reserved hardware history
-    isReserved?: boolean;   // Only for reserved hardware history
+    isReturned?: boolean;   // Only for reserved hardware history
     qSize?: number;
     qPage?: number;
     orderBy?: string;

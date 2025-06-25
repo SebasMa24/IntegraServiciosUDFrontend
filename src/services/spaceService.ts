@@ -25,7 +25,7 @@ export interface RequestOptions {
     endDate?: string;
     getAll?: boolean;       // Only for available spaces
     isHandedOver?: boolean; // Only for reserved space history
-    isReserved?: boolean;   // Only for reserved space history
+    isReturned?: boolean;   // Only for reserved space history
     qSize?: number;
     qPage?: number;
     orderBy?: string;
