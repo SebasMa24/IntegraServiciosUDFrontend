@@ -20,8 +20,6 @@ const HardwareHistoryTab: React.FC = () => {
           getHardwareTypesDomain(),
           getBuildingsDomain()
         ]);
-        console.log("Fetched hardware types:", hardwareTypes);
-        console.log("Fetched buildings:", buildings);
         setHardwareTypesDomain(hardwareTypes);
         setBuildingsDomain(buildings);
       } catch (error) {
@@ -46,7 +44,6 @@ const HardwareHistoryTab: React.FC = () => {
       }
     };
 
-    console.log("Fetching reserved hardware with filters:", reservedHardwareFilters);
     fetchReservedHardware();
   }, [reservedHardwareFilters]);
 
