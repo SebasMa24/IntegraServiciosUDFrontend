@@ -15,7 +15,7 @@ const GET_REQUEST_MAPPING =
  * 
  * @author Nicolás Sabogal
  */
-interface RequestOptions {
+export interface RequestOptions {
     email?: string;         // Only for reserved hardware history
     nameLike?: string;
     type?: string;
