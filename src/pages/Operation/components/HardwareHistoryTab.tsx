@@ -33,12 +33,7 @@ const HardwareHistoryTab: React.FC = () => {
   // Effect to fetch reserved hardware history.
   useEffect(() => {
     const fetchReservedHardware = async () => {
-      // Clean undefined values from filters before sending
-      const cleanedFilters = Object.fromEntries(
-        Object.entries(reservedHardwareFilters).filter(([_, value]) => value !== undefined)
-      ) as HardwareRequestOptions;
-      
-      const response = await getReservedHardwareHistory(cleanedFilters);
+      const response = await getReservedHardwareHistory(reservedHardwareFilters);
       if (response) {
         setReservedHardware(response);
       }
@@ -57,6 +52,7 @@ const HardwareHistoryTab: React.FC = () => {
 
     // Set new timeout for debounced search
     const newTimeout = setTimeout(() => {
+      // Update the reservedHardwareFilters with the nameLike filter.
       setReservedHardwareFilters(prev => ({
         ...prev,
         nameLike: searchValue === '' ? undefined : searchValue

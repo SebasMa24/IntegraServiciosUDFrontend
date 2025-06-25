@@ -94,8 +94,15 @@ async function request(
 ): Promise<any> {
     // Construct the full URL with parameters.
     let url: string = `${baseUrl}${options.endpoint}`;
-    if (options.params && Object.keys(options.params).length > 0)
-        url += '?' + new URLSearchParams(options.params).toString();
+    if (options.params && Object.keys(options.params).length > 0) {
+        // Filter out undefined and null values
+        const filteredParams = Object.fromEntries(
+            Object.entries(options.params).filter(([_, value]) => value !== undefined && value !== null)
+        );
+        if (Object.keys(filteredParams).length > 0) {
+            url += '?' + new URLSearchParams(filteredParams).toString();
+        }
+    }
 
     // Set up headers for the request.
     let headers: Record<string, string> = {};
