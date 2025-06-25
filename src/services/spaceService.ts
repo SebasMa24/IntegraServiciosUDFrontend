@@ -24,6 +24,8 @@ interface RequestOptions {
     startDate?: string;
     endDate?: string;
     getAll?: boolean;
+    isHandedOver?: boolean;
+    isReserved?: boolean;
     qSize?: number;
     qPage?: number;
     orderBy?: string;
