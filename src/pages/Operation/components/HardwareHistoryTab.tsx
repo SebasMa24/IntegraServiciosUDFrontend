@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { getReservedHardwareHistory } from "../../../services/hardwareService";
+import { getHardwareTypesDomain, getBuildingsDomain } from "../../../services/domainService";
 import type { RequestOptions as HardwareRequestOptions } from "../../../services/hardwareService";
 
 const HardwareHistoryTab: React.FC = () => {
@@ -8,6 +9,28 @@ const HardwareHistoryTab: React.FC = () => {
   const [reservedHardwareFilters, setReservedHardwareFilters] = React.useState<HardwareRequestOptions>({});
   const [searchDebounceTimeout, setSearchDebounceTimeout] = React.useState<NodeJS.Timeout | null>(null);
   const [nameSearchValue, setNameSearchValue] = React.useState<string>('');
+  const [hardwareTypesDomain, setHardwareTypesDomain] = React.useState<string[]>([]);
+  const [buildingsDomain, setBuildingsDomain] = React.useState<Array<{code: number, name: string}>>([]);
+
+  // Fetch hardware types and buildings domain data on mount
+  useEffect(() => {
+    const fetchDomains = async () => {
+      try {
+        const [hardwareTypes, buildings] = await Promise.all([
+          getHardwareTypesDomain(),
+          getBuildingsDomain()
+        ]);
+        console.log("Fetched hardware types:", hardwareTypes);
+        console.log("Fetched buildings:", buildings);
+        setHardwareTypesDomain(hardwareTypes);
+        setBuildingsDomain(buildings);
+      } catch (error) {
+        console.error("Error fetching domain data:", error);
+      }
+    };
+
+    fetchDomains();
+  }, []);
 
   // Effect to fetch reserved hardware history.
   useEffect(() => {
@@ -111,26 +134,36 @@ const HardwareHistoryTab: React.FC = () => {
 
             <div className="mb-3">
               <label htmlFor="type" className="form-label">Tipo</label>
-              <input
-                type="text"
-                className="form-control form-control-sm"
+              <select
+                className="form-select form-select-sm"
                 id="type"
                 value={reservedHardwareFiltersForm.type || ''}
                 onChange={(e) => handleFilterFormChange('type', e.target.value)}
-                placeholder="Tipo de hardware"
-              />
+              >
+                <option value="">Todos los tipos</option>
+                {hardwareTypesDomain.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="mb-3">
               <label htmlFor="building" className="form-label">Edificio</label>
-              <input
-                type="number"
-                className="form-control form-control-sm"
+              <select
+                className="form-select form-select-sm"
                 id="building"
                 value={reservedHardwareFiltersForm.building || ''}
                 onChange={(e) => handleFilterFormChange('building', e.target.value ? parseInt(e.target.value) : undefined)}
-                placeholder="Número de edificio"
-              />
+              >
+                <option value="">Todos los edificios</option>
+                {buildingsDomain.map((building) => (
+                  <option key={building.code} value={building.code}>
+                    {building.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="mb-3">
