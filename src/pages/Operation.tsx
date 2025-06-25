@@ -26,7 +26,7 @@ const Operation: React.FC = () => {
       }
   }, [navigate]);  
 
-  // Efect to fetch reserved hardware history.
+  // Effect to fetch reserved hardware history.
   useEffect(() => {
     const fetchReservedHardware = async () => {
       const response = await getReservedHardwareHistory(reservedHardwareFilters);
@@ -38,7 +38,7 @@ const Operation: React.FC = () => {
     fetchReservedHardware();
   }, [reservedHardwareFilters]);
 
-  // Efect to fetch reserved spaces history.
+  // Effect to fetch reserved spaces history.
   useEffect(() => {
     const fetchReservedSpaces = async () => {
       const response = await getReservedSpaceHistory(reservedSpaceFilters);
