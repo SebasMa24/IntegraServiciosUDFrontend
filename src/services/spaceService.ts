@@ -16,16 +16,16 @@ const GET_REQUEST_MAPPING =
  * @author Nicolás Sabogal
  */
 interface RequestOptions {
-    email?: string;
+    email?: string;         // Only for reserved space history
     nameLike?: string;
     type?: string;
     capacity?: number;
     building?: number;
     startDate?: string;
     endDate?: string;
-    getAll?: boolean;
-    isHandedOver?: boolean;
-    isReserved?: boolean;
+    getAll?: boolean;       // Only for available spaces
+    isHandedOver?: boolean; // Only for reserved space history
+    isReserved?: boolean;   // Only for reserved space history
     qSize?: number;
     qPage?: number;
     orderBy?: string;

@@ -16,15 +16,15 @@ const GET_REQUEST_MAPPING =
  * @author Nicolás Sabogal
  */
 interface RequestOptions {
-    email?: string;
+    email?: string;         // Only for reserved hardware history
     nameLike?: string;
     type?: string;
     building?: number;
     startDate?: string;
     endDate?: string;
-    getAll?: boolean;
-    isHandedOver?: boolean;
-    isReserved?: boolean;
+    getAll?: boolean;       // Only for available hardware
+    isHandedOver?: boolean; // Only for reserved hardware history
+    isReserved?: boolean;   // Only for reserved hardware history
     qSize?: number;
     qPage?: number;
     orderBy?: string;
