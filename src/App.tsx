@@ -5,7 +5,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Operation from "./pages/Operation";
+import Operation from "./pages/Operation/Operation";
 import './App.css';
 
 const App: React.FC = () => {
