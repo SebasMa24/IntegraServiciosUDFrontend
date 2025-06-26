@@ -70,6 +70,7 @@ const HardwareHistoryTab: React.FC = () => {
     }));
   };
 
+  // TODO: identify locale and format date accordingly
   const handleDateTimeChange = (dateKey: 'startDate' | 'endDate', date: string, time: string) => {
     if (date && time) {
       const isoString = new Date(`${date}T${time}`).toISOString();
