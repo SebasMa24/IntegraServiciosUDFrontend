@@ -12,7 +12,7 @@ const Operation: React.FC = () => {
       const token = getToken();
       
       if (!token || !isTokenValid(token)) {
-        // Si no hay token o el token ha expirado, redirigir al login
+        // If no token or the token has expired, redirect to login
         navigate("/login");
       }
   }, [navigate]);  
