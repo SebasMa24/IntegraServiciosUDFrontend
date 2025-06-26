@@ -63,10 +63,16 @@ const AvailableHardwareTab: React.FC = () => {
   }, [searchDebounceTimeout]);
 
   const handleFilterFormChange = (key: keyof HardwareRequestOptions, value: any) => {
-    setAvailableHardwareFiltersForm((prev) => ({
-      ...prev,
-      [key]: value === '' ? undefined : value
-    }));
+    let filters = {...availableHardwareFiltersForm, [key]: value };
+
+    // Set getAll based on date availability
+    if (!filters.startDate && !filters.endDate) {
+      filters.getAll = true;
+    } else {
+      filters.getAll = false;
+    }
+
+    setAvailableHardwareFiltersForm(filters);
   };
 
   const handleDateChange = (date: string) => {
@@ -78,13 +84,6 @@ const AvailableHardwareTab: React.FC = () => {
       startDate: date ? createISOStringFromDateTime(date, startTime) : undefined,
       endDate: date ? createISOStringFromDateTime(date, endTime) : undefined,
     };
-
-    // Set getAll based on date availability
-    if (!filters.startDate && !filters.endDate) {
-      filters.getAll = true;
-    } else {
-      filters.getAll = false;
-    }
 
     setAvailableHardwareFiltersForm(filters);
   };
@@ -219,56 +218,6 @@ const AvailableHardwareTab: React.FC = () => {
               />
             </div>
 
-            <div className="mb-3">
-              <label htmlFor="isHandedOver" className="form-label">Estado de entrega</label>
-              <select
-                className="form-select form-select-sm"
-                id="isHandedOver"
-                value={
-                  availableHardwareFiltersForm.isHandedOver === undefined
-                    ? ''
-                    : availableHardwareFiltersForm.isHandedOver
-                      ? 'true'
-                      : 'false'
-                }
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleFilterFormChange('isHandedOver', 
-                    value === '' ? undefined : value === 'true'
-                  );
-                }}
-              >
-                <option value="">Ambos</option>
-                <option value="false">No entregado</option>
-                <option value="true">Entregado</option>
-              </select>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="isReturned" className="form-label">Estado de retorno</label>
-              <select
-                className="form-select form-select-sm"
-                id="isReturned"
-                value={
-                  availableHardwareFiltersForm.isReturned === undefined
-                    ? ''
-                    : availableHardwareFiltersForm.isReturned
-                      ? 'true'
-                      : 'false'
-                }
-                onChange={(e) => {
-                  const value = e.target.value;
-                  handleFilterFormChange('isReturned', 
-                    value === '' ? undefined : value === 'true'
-                  );
-                }}
-              >
-                <option value="">Ambos</option>
-                <option value="false">No devuelto</option>
-                <option value="true">Devuelto</option>
-              </select>
-            </div>
-
             <button 
               type="button" 
               className="btn btn-primary btn-sm w-100 mb-2"
@@ -308,17 +257,17 @@ const AvailableHardwareTab: React.FC = () => {
           <ul className="list-group">
             {/*
               {
-                "code_reshw": 39,
-                "name_building": "Edificio 2",
-                "code_warehouse": 2,
-                "name_hardware": "Hardware 88",
-                "type_hardware": "Tipo Hardware 4",
-                "day_reshw": "2025-04-06"
+                  "code_building": 5,
+                  "code_warehouse": 2,
+                  "code_storedhw": 2,
+                  "name_building": "Edificio 5",
+                  "name_hardware": "Hardware 2",
+                  "type_hardware": "Tipo Hardware 6"
               }
             */}
-            {availableHardware.map((reshw) => (
-              <li key={reshw.code_reshw} className="list-group-item">
-                {reshw.day_reshw} - <strong>{reshw.name_hardware}</strong> ({reshw.type_hardware}) - {reshw.name_building}, almacén {reshw.code_warehouse}
+            {availableHardware.map((shw) => (
+              <li key={`${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`} className="list-group-item">
+                <strong>{shw.name_hardware}</strong> ({shw.type_hardware}) - {shw.name_building}, almacén {shw.code_warehouse}
               </li>
             ))}
           </ul>
