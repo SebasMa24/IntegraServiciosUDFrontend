@@ -157,27 +157,33 @@ const OperationHardwareDetails: React.FC = () => {
           <div className="mb-3">
             <label className="form-label">Calificación de Condición</label>
             <div className="d-flex align-items-center">
-              <span className="me-2">{hardwareDetails.conditionRate}/5</span>
-              <div className="progress flex-grow-1" style={{height: '20px'}}>
-                <div 
-                  className="progress-bar" 
-                  role="progressbar" 
-                  style={{width: `${(hardwareDetails.conditionRate / 5) * 100}%`}}
-                ></div>
-              </div>
+              <span className="me-2">{hardwareDetails.conditionRate !== null ? `${hardwareDetails.conditionRate}/5` : 'Sin calificar'}</span>
+              {hardwareDetails.conditionRate &&
+              (
+                <div className="progress flex-grow-1" style={{height: '20px'}}>
+                  <div 
+                    className="progress-bar" 
+                    role="progressbar" 
+                    style={{width: `${(hardwareDetails.conditionRate / 5) * 100}%`}}
+                  ></div>
+                </div>
+              )}
             </div>
           </div>
           <div className="mb-3">
             <label className="form-label">Calificación de Servicio</label>
             <div className="d-flex align-items-center">
-              <span className="me-2">{hardwareDetails.serviceRate}/5</span>
-              <div className="progress flex-grow-1" style={{height: '20px'}}>
-                <div 
-                  className="progress-bar" 
-                  role="progressbar" 
-                  style={{width: `${(hardwareDetails.serviceRate / 5) * 100}%`}}
-                ></div>
-              </div>
+              <span className="me-2">{hardwareDetails.serviceRate !== null ? `${hardwareDetails.serviceRate}/5` : 'Sin calificar'}</span>
+              { hardwareDetails.serviceRate &&
+              (
+                <div className="progress flex-grow-1" style={{height: '20px'}}>
+                  <div 
+                    className="progress-bar" 
+                    role="progressbar" 
+                    style={{width: `${(hardwareDetails.serviceRate / 5) * 100}%`}}
+                  ></div>
+                </div>
+              )}
             </div>
           </div>
         </div>
