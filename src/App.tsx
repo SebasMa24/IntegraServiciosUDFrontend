@@ -9,6 +9,7 @@ import Operation from "./pages/Operation/Operation";
 import Availability from "./pages/Availability/Availability";
 import './App.css';
 import OperationHardwareDetails from "./pages/Operation/OperationHardwareDetails";
+import OperationSpaceDetails from "./pages/Operation/OperationSpaceDetails";
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/operation" element={<Operation />} />
             <Route path="/operation/details/hardware/:id" element={<OperationHardwareDetails />} />
+            <Route path="/operation/details/space/:id" element={<OperationSpaceDetails />} />
             <Route path="/availability" element={<Availability />} />
           </Routes>
         </main>

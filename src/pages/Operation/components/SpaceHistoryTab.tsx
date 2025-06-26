@@ -4,8 +4,10 @@ import { getReservedSpaceHistory } from "../../../services/spaceService";
 import { getSpaceTypesDomain, getBuildingsDomain } from "../../../services/domainService";
 import { createISOStringFromDateTime, createISOStringFromDate, getDateFromISO, getTimeFromISO } from "../../../utils/dateUtils";
 import type { RequestOptions as SpaceRequestOptions } from "../../../services/spaceService";
+import { useNavigate } from "react-router-dom";
 
 const SpaceHistoryTab: React.FC = () => {
+  const navigate = useNavigate();
   const [reservedSpaces, setReservedSpaces] = React.useState<any[]>([]);
   const [reservedSpaceFiltersForm, setReservedSpaceFiltersForm] = React.useState<SpaceRequestOptions>({});
   const [reservedSpaceFilters, setReservedSpaceFilters] = React.useState<SpaceRequestOptions>({});
@@ -308,7 +310,12 @@ const SpaceHistoryTab: React.FC = () => {
               }
             */}
             {reservedSpaces.map((resspace) => (
-              <li key={resspace.code_resspace} className="list-group-item">
+              <li 
+                key={resspace.code_resspace} 
+                className="list-group-item list-group-item-action" 
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/operation/details/space/${resspace.code_resspace}`)}
+              >
                 {resspace.day_resspace} - <strong>[{resspace.code_space}] {resspace.name_space}</strong> ({resspace.type_space}, capacidad: {resspace.capacity_space}) - {resspace.name_building}
               </li>
             ))}
