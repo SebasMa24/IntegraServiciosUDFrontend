@@ -1,7 +1,339 @@
+import React, { useEffect, useCallback } from 'react';
+import { getRoles } from '../../../services/auth';
+import { getAvailableHardware } from '../../../services/hardwareService';
+import { getHardwareTypesDomain, getBuildingsDomain } from '../../../services/domainService';
+import type { RequestOptions as HardwareRequestOptions } from '../../../services/hardwareService';
+
 const AvailableHardwareTab: React.FC = () => {
+  const [availableHardware, setAvailableHardware] = React.useState<any[]>([]);
+  const [availableHardwareFiltersForm, setAvailableHardwareFiltersForm] = React.useState<HardwareRequestOptions>({});
+  const [availableHardwareFilters, setAvailableHardwareFilters] = React.useState<HardwareRequestOptions>({getAll: true});
+  const [searchDebounceTimeout, setSearchDebounceTimeout] = React.useState<NodeJS.Timeout | null>(null);
+  const [nameSearchValue, setNameSearchValue] = React.useState<string>('');
+  const [hardwareTypesDomain, setHardwareTypesDomain] = React.useState<string[]>([]);
+  const [buildingsDomain, setBuildingsDomain] = React.useState<Array<{code: number, name: string}>>([]);
+
+  // Fetch hardware types and buildings domain data
+  React.useEffect(() => {
+    const fetchDomains = async () => {
+      try {
+        const hardwareTypes = await getHardwareTypesDomain();
+        setHardwareTypesDomain(hardwareTypes);
+        const buildings = await getBuildingsDomain();
+        setBuildingsDomain(buildings);
+      } catch (error) {
+        console.error('Error fetching domains:', error);
+      }
+    };
+    fetchDomains();
+  }, []); 
+
+  // Fetch available hardware
+  useEffect(() => {
+    const fetchAvailableHardware = async () => {
+      const response = await getAvailableHardware(availableHardwareFilters);
+      if (response) {
+        console.log('Available hardware response:', response);
+        setAvailableHardware(response);
+      }
+    };
+
+    fetchAvailableHardware();
+  }, [availableHardwareFilters]);
+
+  const handleNameSearch = useCallback((searchValue: string) => {
+    setNameSearchValue(searchValue);
+
+    // Clear existing timeout
+    if (searchDebounceTimeout) {
+      clearTimeout(searchDebounceTimeout);
+    }
+
+    // Set new timeout for debounced search
+    const newTimeout = setTimeout(() => {
+      // Update the availableHardwareFilters with the nameLike filter.
+      setAvailableHardwareFilters((prev) => ({
+        ...prev,
+        nameLike: searchValue,
+      }));
+    }, 500); // 500ms delay
+
+    setSearchDebounceTimeout(newTimeout);
+  }, [searchDebounceTimeout]);
+
+  const handleFilterFormChange = (key: keyof HardwareRequestOptions, value: any) => {
+    setAvailableHardwareFiltersForm((prev) => ({
+      ...prev,
+      [key]: value === '' ? undefined : value
+    }));
+  };
+
+  // TODO: identify locale and format date and time accordingly
+  const handleDateChange = (date: string) => {
+    const startTime = getTimeFromISO(availableHardwareFiltersForm.startDate) || '00:00';
+    const endTime = getTimeFromISO(availableHardwareFiltersForm.endDate) || '23:59';
+    
+    const filters = {
+      ...availableHardwareFiltersForm,
+      startDate: date ? new Date(`${date}T${startTime}`).toISOString() : undefined,
+      endDate: date ? new Date(`${date}T${endTime}`).toISOString() : undefined,
+    };
+
+    // Set getAll based on date availability
+    if (!filters.startDate && !filters.endDate) {
+      filters.getAll = true;
+    } else {
+      filters.getAll = false;
+    }
+
+    setAvailableHardwareFiltersForm(filters);
+  };
+
+  const handleTimeChange = (timeKey: 'startTime' | 'endTime', time: string) => {
+    const date = getSelectedDate();
+    if (!date) return;
+
+    const targetKey = timeKey === 'startTime' ? 'startDate' : 'endDate';
+    
+    const filters = {
+      ...availableHardwareFiltersForm,
+      [targetKey]: time ? new Date(`${date}T${time}`).toISOString() : undefined,
+    };
+
+    // garantee that both startDate and endDate are set
+    if (filters.startDate && !filters.endDate) {
+      filters.endDate = new Date(`${date}T23:59`).toISOString();
+    } else if (!filters.startDate && filters.endDate) {
+      filters.startDate = new Date(`${date}T00:00`).toISOString();
+    }
+
+    // garantee that startDate is before endDate
+    // To use the strings in the constructor of Date, we need to ensure they are defined which is why they appear in the argument of the conditional
+    if (filters.startDate && filters.endDate && new Date(filters.startDate) > new Date(filters.endDate))
+      filters.endDate = new Date(filters.startDate).toISOString();
+
+    setAvailableHardwareFiltersForm(filters);
+  };
+
+  const getDateFromISO = (isoString?: string) => {
+    if (!isoString) return '';
+    return isoString.split('T')[0];
+  };
+
+  const getTimeFromISO = (isoString?: string) => {
+    if (!isoString) return '';
+    return isoString.split('T')[1]?.substring(0, 5) || '';
+  };
+
+  const getSelectedDate = () => {
+    return getDateFromISO(availableHardwareFiltersForm.startDate) || getDateFromISO(availableHardwareFiltersForm.endDate);
+  };
+
+  const applyFilters = () => {
+    setAvailableHardwareFilters(availableHardwareFiltersForm);
+  }
+
+  const clearFilters = () => {
+    setAvailableHardwareFilters({getAll: true});
+    setAvailableHardwareFiltersForm({});
+    setNameSearchValue('');
+  };
+
   return (
-    <div>
-      <h2>Available Hardware</h2>
+    <div className="row">
+      {/* Filter Panel */}
+      <div className="col-md-3">
+        <div className="card">
+          <div className="card-header">
+            <h5 className="mb-0">Filtros</h5>
+          </div>
+          <div className="card-body">
+            {getRoles()?.includes('ROLE_ADMIN') && (
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-control form-control-sm"
+                  id="email"
+                  value={availableHardwareFiltersForm.email || ''}
+                  onChange={(e) => handleFilterFormChange('email', e.target.value)}
+                  placeholder="usuario@ejemplo.com"
+                />
+              </div>
+            )}
+
+            <div className="mb-3">
+              <label htmlFor="type" className="form-label">Tipo</label>
+              <select
+                className="form-select form-select-sm"
+                id="type"
+                value={availableHardwareFiltersForm.type || ''}
+                onChange={(e) => handleFilterFormChange('type', e.target.value)}
+              >
+                <option value="">Todos los tipos</option>
+                {hardwareTypesDomain.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="building" className="form-label">Edificio</label>
+              <select
+                className="form-select form-select-sm"
+                id="building"
+                value={availableHardwareFiltersForm.building || ''}
+                onChange={(e) => handleFilterFormChange('building', e.target.value ? parseInt(e.target.value) : undefined)}
+              >
+                <option value="">Todos los edificios</option>
+                {buildingsDomain.map((building) => (
+                  <option key={building.code} value={building.code}>
+                    {building.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="reservationDate" className="form-label">Fecha de reserva</label>
+              <input
+                type="date"
+                className="form-control form-control-sm"
+                id="reservationDate"
+                value={getSelectedDate()}
+                onChange={(e) => handleDateChange(e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="startTime" className="form-label">Hora inicio</label>
+              <input
+                type="time"
+                className="form-control form-control-sm"
+                id="startTime"
+                value={getTimeFromISO(availableHardwareFiltersForm.startDate)}
+                onChange={(e) => handleTimeChange('startTime', e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="endTime" className="form-label">Hora fin</label>
+              <input
+                type="time"
+                className="form-control form-control-sm"
+                id="endTime"
+                value={getTimeFromISO(availableHardwareFiltersForm.endDate)}
+                onChange={(e) => handleTimeChange('endTime', e.target.value)}
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="isHandedOver" className="form-label">Estado de entrega</label>
+              <select
+                className="form-select form-select-sm"
+                id="isHandedOver"
+                value={
+                  availableHardwareFiltersForm.isHandedOver === undefined
+                    ? ''
+                    : availableHardwareFiltersForm.isHandedOver
+                      ? 'true'
+                      : 'false'
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleFilterFormChange('isHandedOver', 
+                    value === '' ? undefined : value === 'true'
+                  );
+                }}
+              >
+                <option value="">Ambos</option>
+                <option value="false">No entregado</option>
+                <option value="true">Entregado</option>
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="isReturned" className="form-label">Estado de retorno</label>
+              <select
+                className="form-select form-select-sm"
+                id="isReturned"
+                value={
+                  availableHardwareFiltersForm.isReturned === undefined
+                    ? ''
+                    : availableHardwareFiltersForm.isReturned
+                      ? 'true'
+                      : 'false'
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleFilterFormChange('isReturned', 
+                    value === '' ? undefined : value === 'true'
+                  );
+                }}
+              >
+                <option value="">Ambos</option>
+                <option value="false">No devuelto</option>
+                <option value="true">Devuelto</option>
+              </select>
+            </div>
+
+            <button 
+              type="button" 
+              className="btn btn-primary btn-sm w-100 mb-2"
+              onClick={applyFilters}
+            >
+              Aplicar filtros
+            </button>
+
+            <button 
+              type="button" 
+              className="btn btn-secondary btn-sm w-100"
+              onClick={clearFilters}
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Panel */}
+      <div className="col-md-9">
+        <div className="tab-pane fade show active">
+          <h2 className="text-secondary">Hardware Reservado</h2>
+          
+          <div className="mb-3">
+            <label htmlFor="nameLike" className="form-label">Buscar por nombre</label>
+            <input
+              type="text"
+              className="form-control"
+              id="nameLike"
+              value={nameSearchValue}
+              onChange={(e) => handleNameSearch(e.target.value)}
+              placeholder="Buscar por nombre del hardware..."
+            />
+          </div>
+
+          <ul className="list-group">
+            {/*
+              {
+                "code_reshw": 39,
+                "name_building": "Edificio 2",
+                "code_warehouse": 2,
+                "name_hardware": "Hardware 88",
+                "type_hardware": "Tipo Hardware 4",
+                "day_reshw": "2025-04-06"
+              }
+            */}
+            {availableHardware.map((reshw) => (
+              <li key={reshw.code_reshw} className="list-group-item">
+                {reshw.day_reshw} - <strong>{reshw.name_hardware}</strong> ({reshw.type_hardware}) - {reshw.name_building}, almacén {reshw.code_warehouse}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };
