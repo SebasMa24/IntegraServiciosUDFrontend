@@ -5,6 +5,16 @@
  */
 
 /**
+ * Get the user's locale
+ * 
+ * @returns {string} The user's locale in BCP 47 format (e.g., "en-US")
+ * @author Nicolás Sabogal
+ */
+export const getUserLocale = (): string => {
+  return navigator.language || 'es-CO'; // Default to 'es-CO' if navigator.language is not available
+}
+
+/**
  * Get the user's timezone
  * 
  * @returns {string} The user's timezone in IANA format (e.g., "America/New_York")
