@@ -121,7 +121,6 @@ const OperationHardwareDetails: React.FC = () => {
             <strong>Email:</strong> {hardwareDetails.requester?.email}<br/>
             <strong>Teléfono:</strong> {hardwareDetails.requester?.phone}<br/>
             <strong>Dirección:</strong> {hardwareDetails.requester?.address}<br/>
-            <strong>Rol:</strong> {hardwareDetails.requester?.role?.name.replace('ROLE_', '')}
           </p>
         </div>
       </div>
@@ -137,7 +136,6 @@ const OperationHardwareDetails: React.FC = () => {
             <strong>Email:</strong> {hardwareDetails.manager?.email}<br/>
             <strong>Teléfono:</strong> {hardwareDetails.manager?.phone}<br/>
             <strong>Dirección:</strong> {hardwareDetails.manager?.address}<br/>
-            <strong>Rol:</strong> {hardwareDetails.manager?.role?.name.replace('ROLE_', '')}
           </p>
         </div>
       </div>
