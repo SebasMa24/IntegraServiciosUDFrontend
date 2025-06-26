@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import Operation from "./pages/Operation/Operation";
 import Availability from "./pages/Availability/Availability";
 import './App.css';
+import OperationHardwareDetails from "./pages/Operation/OperationHardwareDetails";
 
 const App: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/operation" element={<Operation />} />
+            <Route path="/operation/details/hardware/:id" element={<OperationHardwareDetails />} />
             <Route path="/availability" element={<Availability />} />
           </Routes>
         </main>

@@ -4,8 +4,10 @@ import { getReservedHardwareHistory } from "../../../services/hardwareService";
 import { getHardwareTypesDomain, getBuildingsDomain } from "../../../services/domainService";
 import { createISOStringFromDateTime, createISOStringFromDate, getDateFromISO, getTimeFromISO } from "../../../utils/dateUtils";
 import type { RequestOptions as HardwareRequestOptions } from "../../../services/hardwareService";
+import { useNavigate } from "react-router-dom";
 
 const HardwareHistoryTab: React.FC = () => {
+  const navigate = useNavigate();
   const [reservedHardware, setReservedHardware] = React.useState<any[]>([]);
   const [reservedHardwareFiltersForm, setReservedHardwareFiltersForm] = React.useState<HardwareRequestOptions>({});
   const [reservedHardwareFilters, setReservedHardwareFilters] = React.useState<HardwareRequestOptions>({});
@@ -294,8 +296,10 @@ const HardwareHistoryTab: React.FC = () => {
               }
             */}
             {reservedHardware.map((reshw) => (
-              <li key={reshw.code_reshw} className="list-group-item">
-                {reshw.day_reshw} - <strong>{reshw.name_hardware}</strong> ({reshw.type_hardware}) - {reshw.name_building}, almacén {reshw.code_warehouse}
+              <li key={reshw.code_reshw} className="list-group-item list-group-item-action" style={{ cursor: 'pointer' }}>
+                <div onClick={() => navigate(`/operation/details/hardware/${reshw.code_reshw}`)}>
+                  {reshw.day_reshw} - <strong>{reshw.name_hardware}</strong> ({reshw.type_hardware}) - {reshw.name_building}, almacén {reshw.code_warehouse}
+                </div>
               </li>
             ))}
           </ul>
