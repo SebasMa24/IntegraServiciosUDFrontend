@@ -34,7 +34,6 @@ const AvailableHardwareTab: React.FC = () => {
     const fetchAvailableHardware = async () => {
       const response = await getAvailableHardware(availableHardwareFilters);
       if (response) {
-        console.log('Available hardware response:', response);
         setAvailableHardware(response);
       }
     };

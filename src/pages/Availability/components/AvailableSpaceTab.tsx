@@ -34,7 +34,6 @@ const AvailableSpacesTab: React.FC = () => {
     const fetchAvailableSpaces = async () => {
       const response = await getAvailableSpaces(availableSpacesFilters);
       if (response) {
-        console.log('Available spaces response:', response);
         setAvailableSpaces(response);
       }
     };
