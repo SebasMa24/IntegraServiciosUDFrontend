@@ -23,7 +23,7 @@ interface RequestOptions {
  * Makes a request to the user management API.
  * 
  * @param options - The options for the request. See {@link RequestOptions} for details.
- * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @returns Whatever the API endpoint returns, parsed as JSON if the response is of type application/json, else returns the response as text.
  * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
  * @author Nicolás Sabogal
  */
@@ -38,7 +38,7 @@ export async function userMgmtRequest(
  * Makes a request to the operation management API.
  * 
  * @param options - The options for the request. See {@link RequestOptions} for details.
- * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @returns Whatever the API endpoint returns, parsed as JSON if the response is of type application/json, else returns the response as text.
  * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
  * @author Nicolás Sabogal
  */
@@ -53,7 +53,7 @@ export async function operationMgmtRequest(
  * Makes a request to the queries management API.
  * 
  * @param options - The options for the request. See {@link RequestOptions} for details.
- * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @returns Whatever the API endpoint returns, parsed as JSON if the response is of type application/json, else returns the response as text.
  * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
  * @author Nicolás Sabogal
  */
@@ -68,7 +68,7 @@ export async function queriesMgmtRequest(
  * Makes a request to the resource management API.
  * 
  * @param options - The options for the request. See {@link RequestOptions} for details.
- * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @returns Whatever the API endpoint returns, parsed as JSON if the response is of type application/json, else returns the response as text.
  * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
  * @author Nicolás Sabogal
  */
@@ -84,7 +84,7 @@ export async function resourceMgmtRequest(
  * 
  * @param baseUrl - The base URL of the API to call.
  * @param options - The options for the request. See {@link RequestOptions} for details.
- * @returns Whatever the API endpoint returns, parsed as JSON.
+ * @returns Whatever the API endpoint returns, parsed as JSON if the response is of type application/json, else returns the response as text.
  * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
  * @author Nicolás Sabogal
  */
@@ -122,14 +122,26 @@ async function request(
 
     // If the response is not ok, throw an error.
     if (!response.ok) {
-        throw new Error(`Error in request ${options.requestName}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Error in request ${options.requestName}: (${response.status})${response.statusText} ${errorText}`);
     }
 
-    // Parse the JSON response and return it.
-    try {
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        throw new Error(`Error parsing JSON response in request ${options.requestName}: ${error}`);
+    // Check if response is JSON
+    const contentType = response.headers.get('Content-Type');
+    if (contentType && contentType.includes('application/json')) {
+        try {
+            const text = await response.text();
+            // Handle empty response body
+            if (!text || text.trim() === '') {
+                return null;
+            }
+            return JSON.parse(text);
+        } catch (error) {
+            throw new Error(`Error parsing JSON response in request ${options.requestName}: ${error}`);
+        }
     }
+    
+    // For non-JSON responses, return as text
+    const textResponse = await response.text();
+    return textResponse || null;
 };
