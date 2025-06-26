@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { getRoles } from '../../../services/auth';
 import { getAvailableHardware } from '../../../services/hardwareService';
 import { getHardwareTypesDomain, getBuildingsDomain } from '../../../services/domainService';
+import { createISOStringFromDateTime, getDateFromISO, getTimeFromISO } from '../../../utils/dateUtils';
 import type { RequestOptions as HardwareRequestOptions } from '../../../services/hardwareService';
 
 const AvailableHardwareTab: React.FC = () => {
@@ -68,15 +69,14 @@ const AvailableHardwareTab: React.FC = () => {
     }));
   };
 
-  // TODO: identify locale and format date and time accordingly
   const handleDateChange = (date: string) => {
     const startTime = getTimeFromISO(availableHardwareFiltersForm.startDate) || '00:00';
     const endTime = getTimeFromISO(availableHardwareFiltersForm.endDate) || '23:59';
     
     const filters = {
       ...availableHardwareFiltersForm,
-      startDate: date ? new Date(`${date}T${startTime}`).toISOString() : undefined,
-      endDate: date ? new Date(`${date}T${endTime}`).toISOString() : undefined,
+      startDate: date ? createISOStringFromDateTime(date, startTime) : undefined,
+      endDate: date ? createISOStringFromDateTime(date, endTime) : undefined,
     };
 
     // Set getAll based on date availability
@@ -97,32 +97,22 @@ const AvailableHardwareTab: React.FC = () => {
     
     const filters = {
       ...availableHardwareFiltersForm,
-      [targetKey]: time ? new Date(`${date}T${time}`).toISOString() : undefined,
+      [targetKey]: time ? createISOStringFromDateTime(date, time) : undefined,
     };
 
     // garantee that both startDate and endDate are set
     if (filters.startDate && !filters.endDate) {
-      filters.endDate = new Date(`${date}T23:59`).toISOString();
+      filters.endDate = createISOStringFromDateTime(date, '23:59');
     } else if (!filters.startDate && filters.endDate) {
-      filters.startDate = new Date(`${date}T00:00`).toISOString();
+      filters.startDate = createISOStringFromDateTime(date, '00:00');
     }
 
     // garantee that startDate is before endDate
-    // To use the strings in the constructor of Date, we need to ensure they are defined which is why they appear in the argument of the conditional
-    if (filters.startDate && filters.endDate && new Date(filters.startDate) > new Date(filters.endDate))
+    if (filters.startDate && filters.endDate && new Date(filters.startDate) > new Date(filters.endDate)) {
       filters.endDate = new Date(filters.startDate).toISOString();
+    }
 
     setAvailableHardwareFiltersForm(filters);
-  };
-
-  const getDateFromISO = (isoString?: string) => {
-    if (!isoString) return '';
-    return isoString.split('T')[0];
-  };
-
-  const getTimeFromISO = (isoString?: string) => {
-    if (!isoString) return '';
-    return isoString.split('T')[1]?.substring(0, 5) || '';
   };
 
   const getSelectedDate = () => {

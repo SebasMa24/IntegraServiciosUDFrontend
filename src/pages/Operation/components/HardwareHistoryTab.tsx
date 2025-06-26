@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from "react";
 import { getRoles } from "../../../services/auth";
 import { getReservedHardwareHistory } from "../../../services/hardwareService";
 import { getHardwareTypesDomain, getBuildingsDomain } from "../../../services/domainService";
+import { createISOStringFromDateTime, createISOStringFromDate, getDateFromISO, getTimeFromISO } from "../../../utils/dateUtils";
 import type { RequestOptions as HardwareRequestOptions } from "../../../services/hardwareService";
 
 const HardwareHistoryTab: React.FC = () => {
@@ -70,29 +71,16 @@ const HardwareHistoryTab: React.FC = () => {
     }));
   };
 
-  // TODO: identify locale and format date accordingly
-  const handleDateTimeChange = (dateKey: 'startDate' | 'endDate', date: string, time: string) => {
+  const handleDateTimeChange = (isStartDate: boolean, date: string, time: string) => {
     if (date && time) {
-      const isoString = new Date(`${date}T${time}`).toISOString();
-      handleFilterFormChange(dateKey, isoString);
+      const isoString = createISOStringFromDateTime(date, time);
+      handleFilterFormChange(isStartDate ? 'startDate' : 'endDate', isoString);
     } else if (date) {
-      // If only date is provided, use start of day for startDate and end of day for endDate
-      const timeDefault = dateKey === 'startDate' ? '00:00' : '23:59';
-      const isoString = new Date(`${date}T${timeDefault}`).toISOString();
-      handleFilterFormChange(dateKey, isoString);
+      const isoString = createISOStringFromDate(date, isStartDate);
+      handleFilterFormChange(isStartDate ? 'startDate' : 'endDate', isoString);
     } else {
-      handleFilterFormChange(dateKey, undefined);
+      handleFilterFormChange(isStartDate ? 'startDate' : 'endDate', undefined);
     }
-  };
-
-  const getDateFromISO = (isoString?: string) => {
-    if (!isoString) return '';
-    return isoString.split('T')[0];
-  };
-
-  const getTimeFromISO = (isoString?: string) => {
-    if (!isoString) return '';
-    return isoString.split('T')[1]?.substring(0, 5) || '';
   };
 
   const applyFilters = () => {
@@ -171,7 +159,7 @@ const HardwareHistoryTab: React.FC = () => {
                     className="form-control form-control-sm"
                     id="startDate"
                     value={getDateFromISO(reservedHardwareFiltersForm.startDate)}
-                    onChange={(e) => handleDateTimeChange('startDate', e.target.value, getTimeFromISO(reservedHardwareFiltersForm.startDate))}
+                    onChange={(e) => handleDateTimeChange(true, e.target.value, getTimeFromISO(reservedHardwareFiltersForm.startDate))}
                   />
                 </div>
                 <div className="col-5">
@@ -179,7 +167,7 @@ const HardwareHistoryTab: React.FC = () => {
                     type="time"
                     className="form-control form-control-sm"
                     value={getTimeFromISO(reservedHardwareFiltersForm.startDate)}
-                    onChange={(e) => handleDateTimeChange('startDate', getDateFromISO(reservedHardwareFiltersForm.startDate), e.target.value)}
+                    onChange={(e) => handleDateTimeChange(true, getDateFromISO(reservedHardwareFiltersForm.startDate), e.target.value)}
                   />
                 </div>
               </div>
@@ -194,7 +182,7 @@ const HardwareHistoryTab: React.FC = () => {
                     className="form-control form-control-sm"
                     id="endDate"
                     value={getDateFromISO(reservedHardwareFiltersForm.endDate)}
-                    onChange={(e) => handleDateTimeChange('endDate', e.target.value, getTimeFromISO(reservedHardwareFiltersForm.endDate))}
+                    onChange={(e) => handleDateTimeChange(false, e.target.value, getTimeFromISO(reservedHardwareFiltersForm.endDate))}
                   />
                 </div>
                 <div className="col-5">
@@ -202,7 +190,7 @@ const HardwareHistoryTab: React.FC = () => {
                     type="time"
                     className="form-control form-control-sm"
                     value={getTimeFromISO(reservedHardwareFiltersForm.endDate)}
-                    onChange={(e) => handleDateTimeChange('endDate', getDateFromISO(reservedHardwareFiltersForm.endDate), e.target.value)}
+                    onChange={(e) => handleDateTimeChange(false, getDateFromISO(reservedHardwareFiltersForm.endDate), e.target.value)}
                   />
                 </div>
               </div>
