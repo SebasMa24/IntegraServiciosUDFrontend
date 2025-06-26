@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Operation from "./pages/Operation/Operation";
+import Availability from "./pages/Availability/Availability";
 import './App.css';
 
 const App: React.FC = () => {
@@ -20,6 +21,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/operation" element={<Operation />} />
+            <Route path="/availability" element={<Availability />} />
           </Routes>
         </main>
         <Footer /> {/* Footer siempre al final */}
