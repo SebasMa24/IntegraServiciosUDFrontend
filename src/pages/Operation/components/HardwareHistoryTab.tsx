@@ -296,10 +296,13 @@ const HardwareHistoryTab: React.FC = () => {
               }
             */}
             {reservedHardware.map((reshw) => (
-              <li key={reshw.code_reshw} className="list-group-item list-group-item-action" style={{ cursor: 'pointer' }}>
-                <div onClick={() => navigate(`/operation/details/hardware/${reshw.code_reshw}`)}>
-                  {reshw.day_reshw} - <strong>{reshw.name_hardware}</strong> ({reshw.type_hardware}) - {reshw.name_building}, almacén {reshw.code_warehouse}
-                </div>
+              <li
+                key={reshw.code_reshw}
+                className="list-group-item list-group-item-action"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/operation/details/hardware/${reshw.code_reshw}`)}
+              >
+                {reshw.day_reshw} - <strong>{reshw.name_hardware}</strong> ({reshw.type_hardware}) - {reshw.name_building}, almacén {reshw.code_warehouse}
               </li>
             ))}
           </ul>
