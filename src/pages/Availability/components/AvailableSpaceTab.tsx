@@ -1,5 +1,4 @@
 import React, { useEffect, useCallback } from 'react';
-import { getRoles } from '../../../services/auth';
 import { getAvailableSpaces } from '../../../services/spaceService';
 import { getSpaceTypesDomain, getBuildingsDomain } from '../../../services/domainService';
 import { createISOStringFromDateTime, getDateFromISO, getTimeFromISO } from '../../../utils/dateUtils';
@@ -138,20 +137,6 @@ const AvailableSpacesTab: React.FC = () => {
             <h5 className="mb-0">Filtros</h5>
           </div>
           <div className="card-body">
-            {getRoles()?.includes('ROLE_ADMIN') && (
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email</label>
-                <input
-                  type="email"
-                  className="form-control form-control-sm"
-                  id="email"
-                  value={availableSpacesFiltersForm.email || ''}
-                  onChange={(e) => handleFilterFormChange('email', e.target.value)}
-                  placeholder="usuario@ejemplo.com"
-                />
-              </div>
-            )}
-
             <div className="mb-3">
               <label htmlFor="type" className="form-label">Tipo</label>
               <select
