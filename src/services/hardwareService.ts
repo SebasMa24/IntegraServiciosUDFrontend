@@ -5,8 +5,17 @@ import { queriesMgmtRequest } from "./requests";
  * 
  * @author Nicolás Sabogal
  */
-const GET_REQUEST_MAPPING =
+const GET_OPERATIONS_REQUEST_MAPPING =
     '/' + (import.meta.env.VITE_OPERATION_QUERIES_REQUEST_MAPPING || 'api/operations') +
+    '/hardware';
+
+/**
+ * Request mapping for resource queries related to hardware.
+ * 
+ * @author Nicolás Sabogal
+ */
+const GET_RESOURCES_REQUEST_MAPPING =
+    '/' + (import.meta.env.VITE_RESOURCE_QUERIES_REQUEST_MAPPING || 'api/resources') +
     '/hardware';
 
 /**
@@ -40,7 +49,7 @@ export interface RequestOptions {
  * @author Nicolás Sabogal
  */
 export async function getReservedHardwareHistory(params: RequestOptions = {}): Promise<any> {
-    const REQUEST_URL = GET_REQUEST_MAPPING;
+    const REQUEST_URL = GET_OPERATIONS_REQUEST_MAPPING;
     return queriesMgmtRequest({
         requestName: "getReservedHardwareHistory",
         endpoint: REQUEST_URL,
@@ -58,7 +67,7 @@ export async function getReservedHardwareHistory(params: RequestOptions = {}): P
  * @author Nicolás Sabogal
  */
 export async function getAvailableHardware(params: RequestOptions = {}): Promise<any> {
-    const REQUEST_URL = `${GET_REQUEST_MAPPING}/availability`;
+    const REQUEST_URL = `${GET_OPERATIONS_REQUEST_MAPPING}/availability`;
     return queriesMgmtRequest({
         requestName: "getAvailableHardware",
         endpoint: REQUEST_URL,
@@ -76,9 +85,28 @@ export async function getAvailableHardware(params: RequestOptions = {}): Promise
  * @author Nicolás Sabogal
  */
 export async function getReservedHardwareDetails(hardwareId: bigint): Promise<any> {
-    const REQUEST_URL = `${GET_REQUEST_MAPPING}/${hardwareId}`;
+    const REQUEST_URL = `${GET_OPERATIONS_REQUEST_MAPPING}/${hardwareId}`;
     return queriesMgmtRequest({
         requestName: "getReservedHardwareDetails",
+        endpoint: REQUEST_URL,
+        method: "GET"
+    });
+}
+
+/**
+ * Fetches the stored hardware details for a specific building and warehouse.
+ * 
+ * @param buildingId - The ID of the building.
+ * @param warehouseId - The ID of the warehouse.
+ * @param hardwareId - The ID of the hardware.
+ * @returns A promise that resolves to the stored hardware details.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
+export async function getStoredHardwareDetails(buildingId: number, warehouseId: number, hardwareId: number): Promise<any> {
+    const REQUEST_URL = `${GET_RESOURCES_REQUEST_MAPPING}/${buildingId}-${warehouseId}-${hardwareId}`;
+    return queriesMgmtRequest({
+        requestName: "getStoredHardwareDetails",
         endpoint: REQUEST_URL,
         method: "GET"
     });

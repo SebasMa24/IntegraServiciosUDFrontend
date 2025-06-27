@@ -4,8 +4,10 @@ import { getAvailableHardware } from '../../../services/hardwareService';
 import { getHardwareTypesDomain, getBuildingsDomain } from '../../../services/domainService';
 import { createISOStringFromDateTime, getDateFromISO, getTimeFromISO } from '../../../utils/dateUtils';
 import type { RequestOptions as HardwareRequestOptions } from '../../../services/hardwareService';
+import { useNavigate } from 'react-router-dom';
 
 const AvailableHardwareTab: React.FC = () => {
+  const navigate = useNavigate();
   const [availableHardware, setAvailableHardware] = React.useState<any[]>([]);
   const [availableHardwareFiltersForm, setAvailableHardwareFiltersForm] = React.useState<HardwareRequestOptions>({});
   const [availableHardwareFilters, setAvailableHardwareFilters] = React.useState<HardwareRequestOptions>({getAll: true});
@@ -265,7 +267,12 @@ const AvailableHardwareTab: React.FC = () => {
               }
             */}
             {availableHardware.map((shw) => (
-              <li key={`${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`} className="list-group-item">
+              <li
+                key={`${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`}
+                className="list-group-item list-group-item-action"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/availability/details/hardware/${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`)}
+              >
                 <strong>{shw.name_hardware}</strong> ({shw.type_hardware}) - {shw.name_building}, almacén {shw.code_warehouse}
               </li>
             ))}

@@ -4,8 +4,10 @@ import { getAvailableSpaces } from '../../../services/spaceService';
 import { getSpaceTypesDomain, getBuildingsDomain } from '../../../services/domainService';
 import { createISOStringFromDateTime, getDateFromISO, getTimeFromISO } from '../../../utils/dateUtils';
 import type { RequestOptions as SpaceRequestOptions } from '../../../services/spaceService';
+import { useNavigate } from 'react-router-dom';
 
 const AvailableSpacesTab: React.FC = () => {
+  const navigate = useNavigate();
   const [availableSpaces, setAvailableSpaces] = React.useState<any[]>([]);
   const [availableSpacesFiltersForm, setAvailableSpacesFiltersForm] = React.useState<SpaceRequestOptions>({});
   const [availableSpacesFilters, setAvailableSpacesFilters] = React.useState<SpaceRequestOptions>({getAll: true});
@@ -278,7 +280,12 @@ const AvailableSpacesTab: React.FC = () => {
           */}
           <ul className="list-group">
             {availableSpaces.map((space) => (
-              <li key={`${space.code_space}-${space.code_building}`} className="list-group-item">
+              <li
+                key={`${space.code_space}-${space.code_building}`}
+                className="list-group-item list-group-item-action"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate(`/availability/details/space/${space.code_building}-${space.code_space}`)}
+              >
                 <strong>{space.name_space}</strong> ({space.type_space}) - {space.name_building}, Capacidad: {space.capacity_space}
               </li>
             ))}

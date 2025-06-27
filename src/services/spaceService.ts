@@ -10,6 +10,15 @@ const GET_REQUEST_MAPPING =
     '/space';
 
 /**
+ * Request mapping for resource queries related to spaces.
+ * 
+ * @author Nicolás Sabogal
+ */
+const GET_RESOURCES_REQUEST_MAPPING =
+    '/' + (import.meta.env.VITE_RESOURCE_QUERIES_REQUEST_MAPPING || 'api/resources') +
+    '/space';
+
+/**
  * Interface for request options when fetching space data.
  * This interface defines the parameters that can be used to filter and paginate the results.
  * 
@@ -80,6 +89,24 @@ export async function getReservedSpaceDetails(spaceId: bigint): Promise<any> {
     const REQUEST_URL = `${GET_REQUEST_MAPPING}/${spaceId}`;
     return queriesMgmtRequest({
         requestName: "getReservedSpaceDetails",
+        endpoint: REQUEST_URL,
+        method: "GET"
+    });
+}
+
+/**
+ * Fetches the details of a space by its building ID and space ID.
+ * 
+ * @param buildingId - The ID of the building where the space is located.
+ * @param spaceId - The ID of the space to fetch details for.
+ * @returns A promise that resolves to the space details data.
+ * @throws An error if the request fails or if the response cannot be parsed.
+ * @author Nicolás Sabogal
+ */
+export async function getSpaceDetails(buildingId: number, spaceId: number): Promise<any> {
+    const REQUEST_URL = `${GET_RESOURCES_REQUEST_MAPPING}/${buildingId}-${spaceId}`;
+    return queriesMgmtRequest({
+        requestName: "getSpaceDetails",
         endpoint: REQUEST_URL,
         method: "GET"
     });
