@@ -5,8 +5,13 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Operation from "./pages/Operation";
+import Operation from "./pages/Operation/Operation";
+import Availability from "./pages/Availability/Availability";
 import './App.css';
+import OperationHardwareDetails from "./pages/Operation/OperationHardwareDetails";
+import OperationSpaceDetails from "./pages/Operation/OperationSpaceDetails";
+import StoredHardwareDetails from "./pages/Availability/StoredHardwareDetails";
+import SpaceDetails from "./pages/Availability/SpaceDetails";
 
 const App: React.FC = () => {
   return (
@@ -20,6 +25,11 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/operation" element={<Operation />} />
+            <Route path="/operation/details/hardware/:id" element={<OperationHardwareDetails />} />
+            <Route path="/operation/details/space/:id" element={<OperationSpaceDetails />} />
+            <Route path="/availability" element={<Availability />} />
+            <Route path="/availability/details/hardware/:id" element={<StoredHardwareDetails />} />
+            <Route path="/availability/details/space/:id" element={<SpaceDetails />} />
           </Routes>
         </main>
         <Footer /> {/* Footer siempre al final */}
