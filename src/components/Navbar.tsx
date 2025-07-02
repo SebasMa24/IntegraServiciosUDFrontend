@@ -69,6 +69,11 @@ const Navbar: React.FC = () => {
                   </Link>
                 </li>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/resource">
+                    Resource
+                  </Link>
+                </li>
+                <li className="nav-item">
                   <Link className="nav-link" to="/availability">
                     Availability
                   </Link>

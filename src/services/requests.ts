@@ -30,7 +30,7 @@ interface RequestOptions {
 export async function userMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
-    const baseUrl = import.meta.env.VITE_USER_API_URL || 'http://localhost:8080';
+    const baseUrl = import.meta.env.VITE_USER_API_URL ;
     return request(baseUrl, options);
 };
 
@@ -45,7 +45,7 @@ export async function userMgmtRequest(
 export async function operationMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
-    const baseUrl = import.meta.env.VITE_OPERATION_API_URL || 'http://localhost:8081';
+    const baseUrl = import.meta.env.VITE_OPERATION_API_URL;
     return request(baseUrl, options);
 };
 
@@ -60,7 +60,7 @@ export async function operationMgmtRequest(
 export async function queriesMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
-    const baseUrl = import.meta.env.VITE_QUERY_API_URL || 'http://localhost:8082'
+    const baseUrl = import.meta.env.VITE_QUERY_API_URL
     return request(baseUrl, options);
 };
 
@@ -75,7 +75,7 @@ export async function queriesMgmtRequest(
 export async function resourceMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
-    const baseUrl = import.meta.env.VITE_RESOURCE_API_URL || 'http://localhost:8083';
+    const baseUrl = import.meta.env.VITE_RESOURCE_API_URL;
     return request(baseUrl, options);
 };
 
@@ -137,7 +137,7 @@ async function request(
             }
             return JSON.parse(text);
         } catch (error) {
-            throw new Error(`Error parsing JSON response in request ${options.requestName}: ${error}`);
+            throw new Error(`Error parsing JSON response ein requst ${options.requestName}: ${error}`);
         }
     }
     

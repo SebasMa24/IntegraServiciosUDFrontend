@@ -1,5 +1,5 @@
 
-const URL = "http://localhost:8083/";
+const URL = import.meta.env.VITE_RESOURCE_API_URL+"/";
 
 export interface InfoTypeAndState {
     name: string;
