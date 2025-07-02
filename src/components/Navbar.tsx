@@ -64,8 +64,23 @@ const Navbar: React.FC = () => {
             {isLoggedIn() ? (
               <>
                 <li className="nav-item">
+                  <Link className="nav-link" to="/home">
+                    Home
+                  </Link>
+                </li>
+                <li className="nav-item">
                   <Link className="nav-link" to="/reservations">
                     Reservas
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/availability">
+                    Availability
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/operation">
+                    Operation
                   </Link>
                 </li>
                 <li className="nav-item ms-2">
