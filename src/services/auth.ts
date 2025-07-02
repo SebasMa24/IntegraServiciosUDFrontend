@@ -17,6 +17,24 @@ export const getToken = (): string | null => {
   return localStorage.getItem("authToken");
 };
 
+/**
+ * Obtiene los roles del usuario desde el token JWT almacenado en localStorage.
+ *
+ * @returns Los roles del usuario desde el token JWT almacenado en localStorage o null si no hay token o no se puede decodificar.
+ * @author Nicolás Sabogal
+ */
+export const getRoles = (): string[] | null => {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const decoded: any = jwtDecode(token);
+    return decoded.roles || null;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
+
 export function isLoggedIn(): boolean {
   const token = getToken();
   return token != null && isTokenValid(token);
