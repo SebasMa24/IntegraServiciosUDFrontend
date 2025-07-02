@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 // Tipos para TypeScript
-interface Reservation {
+interface SpaceReservation {
   id?: string;
   building: number;
   resourceCode: number;
-  storedResourceCode: number;
   requester: string;
   manager: string;
   start: string;
@@ -23,20 +22,19 @@ interface Message {
 }
 
 // Configuración de la API
-const API_BASE_URL = 'https://operationmanagement.onrender.com/api/operations/hardware';
+const API_BASE_URL = 'https://operationmanagement.onrender.com/api/operations/space';
 
-const OperationsManager: React.FC = () => {
+const SpaceOperationsManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('availability');
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<Message>({ text: '', type: 'info' });
   const [availability, setAvailability] = useState<any[]>([]);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [reservations, setReservations] = useState<SpaceReservation[]>([]);
 
-  // Estado para el formulario de nueva reserva
-  const [formData, setFormData] = useState<Reservation>({
+  // Estado para el formulario de nueva reserva de espacio
+  const [formData, setFormData] = useState<SpaceReservation>({
     building: 0,
     resourceCode: 0,
-    storedResourceCode: 0,
     requester: '',
     manager: '',
     start: '',
@@ -56,7 +54,7 @@ const OperationsManager: React.FC = () => {
     setTimeout(() => setMessage({ text: '', type: 'info' }), 3000);
   };
 
-  // Obtener disponibilidad
+  // Obtener disponibilidad de espacios
   const fetchAvailability = async () => {
     setLoading(true);
     try {
@@ -64,9 +62,9 @@ const OperationsManager: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         setAvailability(Array.isArray(data) ? data : []);
-        showMessage('Disponibilidad actualizada', 'success');
+        showMessage('Disponibilidad de espacios actualizada', 'success');
       } else {
-        showMessage('Error al obtener disponibilidad', 'error');
+        showMessage('Error al obtener disponibilidad de espacios', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -75,7 +73,7 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Obtener reservas
+  // Obtener reservas de espacios
   const fetchReservations = async () => {
     setLoading(true);
     try {
@@ -83,9 +81,9 @@ const OperationsManager: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         setReservations(Array.isArray(data) ? data : []);
-        showMessage('Reservas actualizadas', 'success');
+        showMessage('Reservas de espacios actualizadas', 'success');
       } else {
-        showMessage('Error al obtener reservas', 'error');
+        showMessage('Error al obtener reservas de espacios', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -94,7 +92,7 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Crear nueva reserva
+  // Crear nueva reserva de espacio
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -103,8 +101,7 @@ const OperationsManager: React.FC = () => {
       const payload = {
         ...formData,
         building: Number(formData.building),
-        resourceCode: Number(formData.resourceCode),
-        storedResourceCode: Number(formData.storedResourceCode)
+        resourceCode: Number(formData.resourceCode)
       };
 
       const response = await fetch(API_BASE_URL, {
@@ -116,18 +113,17 @@ const OperationsManager: React.FC = () => {
       });
 
       if (response.ok) {
-        showMessage('Reserva creada exitosamente', 'success');
+        showMessage('Reserva de espacio creada exitosamente', 'success');
         setFormData({
           building: 0,
           resourceCode: 0,
-          storedResourceCode: 0,
           requester: '',
           manager: '',
           start: '',
           end: ''
         });
       } else {
-        showMessage('Error al crear la reserva', 'error');
+        showMessage('Error al crear la reserva de espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -136,9 +132,9 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Eliminar reserva
+  // Eliminar reserva de espacio
   const handleDelete = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva?')) return;
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva de espacio?')) return;
     
     try {
       const response = await fetch(`${API_BASE_URL}/${id}`, {
@@ -146,17 +142,17 @@ const OperationsManager: React.FC = () => {
       });
       
       if (response.ok) {
-        showMessage('Reserva eliminada exitosamente', 'success');
+        showMessage('Reserva de espacio eliminada exitosamente', 'success');
         fetchReservations();
       } else {
-        showMessage('Error al eliminar la reserva', 'error');
+        showMessage('Error al eliminar la reserva de espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
     }
   };
 
-  // Entrega de hardware
+  // Entrega de espacio
   const handleHandOver = async () => {
     if (!reservationId) {
       showMessage('Por favor ingresa un ID de reserva', 'error');
@@ -170,9 +166,9 @@ const OperationsManager: React.FC = () => {
       });
       
       if (response.ok) {
-        showMessage('Entrega realizada exitosamente', 'success');
+        showMessage('Entrega de espacio realizada exitosamente', 'success');
       } else {
-        showMessage('Error al realizar la entrega', 'error');
+        showMessage('Error al realizar la entrega del espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -181,7 +177,7 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Devolución de hardware
+  // Devolución de espacio
   const handleReturn = async () => {
     if (!reservationId) {
       showMessage('Por favor ingresa un ID de reserva', 'error');
@@ -202,11 +198,11 @@ const OperationsManager: React.FC = () => {
       });
       
       if (response.ok) {
-        showMessage('Devolución realizada exitosamente', 'success');
+        showMessage('Devolución de espacio realizada exitosamente', 'success');
         setReservationId('');
         setReturnData({ conditionRate: 5, serviceRate: 5 });
       } else {
-        showMessage('Error al realizar la devolución', 'error');
+        showMessage('Error al realizar la devolución del espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -228,8 +224,8 @@ const OperationsManager: React.FC = () => {
       {/* Header */}
       <div className="row mb-4">
         <div className="col-12 text-center">
-          <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Hardware</h1>
-          <p className="lead text-muted">Gestiona las reservas y disponibilidad de hardware</p>
+          <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Espacios</h1>
+          <p className="lead text-muted">Gestiona las reservas y disponibilidad de espacios</p>
         </div>
       </div>
 
@@ -254,7 +250,7 @@ const OperationsManager: React.FC = () => {
                 className={`nav-link ${activeTab === 'availability' ? 'active' : ''}`}
                 onClick={() => setActiveTab('availability')}
               >
-                📋 Disponibilidad
+                🏢 Disponibilidad
               </button>
             </li>
             <li className="nav-item">
@@ -295,7 +291,7 @@ const OperationsManager: React.FC = () => {
               {activeTab === 'availability' && (
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2 className="card-title mb-0">Disponibilidad de Hardware</h2>
+                    <h2 className="card-title mb-0">Disponibilidad de Espacios</h2>
                     <button
                       onClick={fetchAvailability}
                       disabled={loading}
@@ -317,7 +313,7 @@ const OperationsManager: React.FC = () => {
                       <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Cargando...</span>
                       </div>
-                      <p className="mt-3">Cargando disponibilidad...</p>
+                      <p className="mt-3">Cargando disponibilidad de espacios...</p>
                     </div>
                   ) : availability.length > 0 ? (
                     <div className="row">
@@ -325,7 +321,7 @@ const OperationsManager: React.FC = () => {
                         <div key={index} className="col-md-6 col-lg-4 mb-3">
                           <div className="card h-100">
                             <div className="card-header">
-                              <h5 className="card-title mb-0">Hardware {index + 1}</h5>
+                              <h5 className="card-title mb-0">Espacio {index + 1}</h5>
                             </div>
                             <div className="card-body">
                               <pre className="small bg-light p-2 rounded">
@@ -339,8 +335,8 @@ const OperationsManager: React.FC = () => {
                   ) : (
                     <div className="text-center py-5">
                       <div className="text-muted">
-                        <i className="bi bi-inbox display-1"></i>
-                        <p className="mt-3">No hay datos de disponibilidad</p>
+                        <i className="bi bi-building display-1"></i>
+                        <p className="mt-3">No hay datos de disponibilidad de espacios</p>
                       </div>
                     </div>
                   )}
@@ -350,7 +346,7 @@ const OperationsManager: React.FC = () => {
               {/* Tab de Nueva Reserva */}
               {activeTab === 'create' && (
                 <div>
-                  <h2 className="card-title mb-4">Nueva Reserva</h2>
+                  <h2 className="card-title mb-4">Nueva Reserva de Espacio</h2>
                   
                   <form onSubmit={handleSubmit}>
                     <div className="row g-3">
@@ -367,25 +363,13 @@ const OperationsManager: React.FC = () => {
                       </div>
                       
                       <div className="col-md-6">
-                        <label className="form-label">Código de Recurso</label>
+                        <label className="form-label">Código de Espacio</label>
                         <input
                           type="number"
                           className="form-control"
                           value={formData.resourceCode}
                           onChange={(e) => setFormData({...formData, resourceCode: Number(e.target.value)})}
-                          placeholder="Código del recurso"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="col-md-6">
-                        <label className="form-label">Código de Recurso Almacenado</label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={formData.storedResourceCode}
-                          onChange={(e) => setFormData({...formData, storedResourceCode: Number(e.target.value)})}
-                          placeholder="Código del recurso almacenado"
+                          placeholder="Código del espacio (ej: 102)"
                           required
                         />
                       </div>
@@ -397,7 +381,7 @@ const OperationsManager: React.FC = () => {
                           className="form-control"
                           value={formData.requester}
                           onChange={(e) => setFormData({...formData, requester: e.target.value})}
-                          placeholder="email@example.com"
+                          placeholder="usuario@example.com"
                           required
                         />
                       </div>
@@ -449,7 +433,7 @@ const OperationsManager: React.FC = () => {
                             Creando Reserva...
                           </>
                         ) : (
-                          'Crear Reserva'
+                          'Crear Reserva de Espacio'
                         )}
                       </button>
                     </div>
@@ -461,7 +445,7 @@ const OperationsManager: React.FC = () => {
               {activeTab === 'reservations' && (
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2 className="card-title mb-0">Mis Reservas</h2>
+                    <h2 className="card-title mb-0">Mis Reservas de Espacios</h2>
                     <button
                       onClick={fetchReservations}
                       disabled={loading}
@@ -483,7 +467,7 @@ const OperationsManager: React.FC = () => {
                       <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">Cargando...</span>
                       </div>
-                      <p className="mt-3">Cargando reservas...</p>
+                      <p className="mt-3">Cargando reservas de espacios...</p>
                     </div>
                   ) : reservations.length > 0 ? (
                     <div className="row">
@@ -491,7 +475,7 @@ const OperationsManager: React.FC = () => {
                         <div key={reservation.id || index} className="col-12 mb-3">
                           <div className="card">
                             <div className="card-header d-flex justify-content-between align-items-center">
-                              <h5 className="card-title mb-0">Reserva #{reservation.id || index + 1}</h5>
+                              <h5 className="card-title mb-0">Reserva de Espacio #{reservation.id || index + 1}</h5>
                               <button
                                 onClick={() => handleDelete(reservation.id || String(index + 1))}
                                 className="btn btn-outline-danger btn-sm"
@@ -500,9 +484,18 @@ const OperationsManager: React.FC = () => {
                               </button>
                             </div>
                             <div className="card-body">
-                              <pre className="small bg-light p-2 rounded">
-                                {JSON.stringify(reservation, null, 2)}
-                              </pre>
+                              <div className="row">
+                                <div className="col-md-6">
+                                  <p><strong>Edificio:</strong> {reservation.building}</p>
+                                  <p><strong>Código de Espacio:</strong> {reservation.resourceCode}</p>
+                                  <p><strong>Solicitante:</strong> {reservation.requester}</p>
+                                </div>
+                                <div className="col-md-6">
+                                  <p><strong>Gerente:</strong> {reservation.manager}</p>
+                                  <p><strong>Inicio:</strong> {new Date(reservation.start).toLocaleString()}</p>
+                                  <p><strong>Fin:</strong> {new Date(reservation.end).toLocaleString()}</p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -512,7 +505,7 @@ const OperationsManager: React.FC = () => {
                     <div className="text-center py-5">
                       <div className="text-muted">
                         <i className="bi bi-calendar-x display-1"></i>
-                        <p className="mt-3">No tienes reservas activas</p>
+                        <p className="mt-3">No tienes reservas de espacios activas</p>
                       </div>
                     </div>
                   )}
@@ -522,7 +515,7 @@ const OperationsManager: React.FC = () => {
               {/* Tab de Acciones */}
               {activeTab === 'actions' && (
                 <div>
-                  <h2 className="card-title mb-4">Acciones de Reserva</h2>
+                  <h2 className="card-title mb-4">Acciones de Reserva de Espacio</h2>
                   
                   <div className="mb-4">
                     <label className="form-label">ID de Reserva</label>
@@ -531,7 +524,7 @@ const OperationsManager: React.FC = () => {
                       className="form-control"
                       value={reservationId}
                       onChange={(e) => setReservationId(e.target.value)}
-                      placeholder="Ingresa el ID de la reserva"
+                      placeholder="Ingresa el ID de la reserva de espacio"
                     />
                   </div>
 
@@ -540,10 +533,10 @@ const OperationsManager: React.FC = () => {
                     <div className="col-md-6">
                       <div className="card border-primary">
                         <div className="card-header bg-primary text-white">
-                          <h5 className="card-title mb-0">📦 Entrega de Hardware</h5>
+                          <h5 className="card-title mb-0">🏢 Entrega de Espacio</h5>
                         </div>
                         <div className="card-body">
-                          <p className="card-text">Marca el hardware como entregado al usuario</p>
+                          <p className="card-text">Marca el espacio como entregado al usuario</p>
                           <button
                             onClick={handleHandOver}
                             disabled={loading || !reservationId}
@@ -566,10 +559,10 @@ const OperationsManager: React.FC = () => {
                     <div className="col-md-6">
                       <div className="card border-success">
                         <div className="card-header bg-success text-white">
-                          <h5 className="card-title mb-0">🔄 Devolución de Hardware</h5>
+                          <h5 className="card-title mb-0">🔄 Devolución de Espacio</h5>
                         </div>
                         <div className="card-body">
-                          <p className="card-text">Procesa la devolución del hardware con calificaciones</p>
+                          <p className="card-text">Procesa la devolución del espacio con calificaciones</p>
                           
                           <div className="row g-3 mb-3">
                             <div className="col-6">
@@ -626,4 +619,4 @@ const OperationsManager: React.FC = () => {
   );
 };
 
-export default OperationsManager;
+export default SpaceOperationsManager;

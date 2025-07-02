@@ -1,8 +1,7 @@
-export interface Reservation {
+export interface SpaceReservation {
   id?: string;
   building: number;
   resourceCode: number;
-  storedResourceCode: number;
   requester: string;
   manager: string;
   start: string;
@@ -14,11 +13,11 @@ export interface ReturnData {
   serviceRate: number;
 }
 
-const API_BASE_URL = 'https://operationmanagement.onrender.com/api/operations/hardware';
+const API_BASE_URL = 'https://operationmanagement.onrender.com/api/operations/space';
 
-class OperationsService {
+class SpaceOperationsService {
   
-  // GET /api/operations/hardware/availability
+  // GET /api/operations/space/availability
   async getAvailability(): Promise<any[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/availability`);
@@ -28,13 +27,13 @@ class OperationsService {
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error('Error fetching availability:', error);
+      console.error('Error fetching space availability:', error);
       throw error;
     }
   }
 
-  // GET /api/operations/hardware/email
-  async getReservations(): Promise<Reservation[]> {
+  // GET /api/operations/space (obtener todas las reservas de espacios)
+  async getReservations(): Promise<SpaceReservation[]> {
     try {
       const response = await fetch(API_BASE_URL);
       if (!response.ok) {
@@ -43,13 +42,13 @@ class OperationsService {
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     } catch (error) {
-      console.error('Error fetching reservations:', error);
+      console.error('Error fetching space reservations:', error);
       throw error;
     }
   }
 
-  // POST /api/operations/hardware (crear reserva)
-  async createReservation(reservation: Omit<Reservation, 'id'>): Promise<Reservation> {
+  // POST /api/operations/space (crear reserva de espacio)
+  async createReservation(reservation: Omit<SpaceReservation, 'id'>): Promise<SpaceReservation> {
     try {
       const response = await fetch(API_BASE_URL, {
         method: 'POST',
@@ -65,12 +64,12 @@ class OperationsService {
       
       return await response.json();
     } catch (error) {
-      console.error('Error creating reservation:', error);
+      console.error('Error creating space reservation:', error);
       throw error;
     }
   }
 
-  // DELETE /api/operations/hardware/{reservationid}
+  // DELETE /api/operations/space/{reservationid}
   async deleteReservation(reservationId: string): Promise<void> {
     try {
       const response = await fetch(`${API_BASE_URL}/${reservationId}`, {
@@ -81,13 +80,13 @@ class OperationsService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error deleting reservation:', error);
+      console.error('Error deleting space reservation:', error);
       throw error;
     }
   }
 
-  // POST /api/operations/hardware/{reservationid}/handOver
-  async handOverHardware(reservationId: string): Promise<void> {
+  // POST /api/operations/space/{reservationid}/handOver
+  async handOverSpace(reservationId: string): Promise<void> {
     try {
       const response = await fetch(`${API_BASE_URL}/${reservationId}/handOver`, {
         method: 'POST'
@@ -97,13 +96,13 @@ class OperationsService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error in handover:', error);
+      console.error('Error in space handover:', error);
       throw error;
     }
   }
 
-  // POST /api/operations/hardware/{reservationid}/return
-  async returnHardware(reservationId: string, returnData: ReturnData): Promise<void> {
+  // POST /api/operations/space/{reservationid}/return
+  async returnSpace(reservationId: string, returnData: ReturnData): Promise<void> {
     try {
       const response = await fetch(`${API_BASE_URL}/${reservationId}/return`, {
         method: 'POST',
@@ -117,12 +116,12 @@ class OperationsService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error returning hardware:', error);
+      console.error('Error returning space:', error);
       throw error;
     }
   }
 }
 
 // Exportar una instancia del servicio
-export const operationsService = new OperationsService();
-export default operationsService;
+export const spaceOperationsService = new SpaceOperationsService();
+export default spaceOperationsService;
