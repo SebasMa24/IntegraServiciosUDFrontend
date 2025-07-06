@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import AvailableHardwareTab from '../pages/Availability/components/AvailableHardwareTab'; // Ajusta la ruta según tu estructura
+import AvailableHardwareTab from '../pages/Availability/components/AvailableHardwareTab';
+import { getRoles, isLoggedIn } from '../services/auth'; 
 
 // Tipos para TypeScript
 interface Reservation {
@@ -31,6 +32,8 @@ const OperationsManager: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<Message>({ text: '', type: 'info' });
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Estado para el formulario de nueva reserva
   const [formData, setFormData] = useState<Reservation>({
@@ -50,6 +53,34 @@ const OperationsManager: React.FC = () => {
     serviceRate: 5
   });
 
+  // Verificar autenticación y roles al cargar el componente
+  useEffect(() => {
+    const checkAuth = () => {
+      const authenticated = isLoggedIn();
+      const roles = getRoles();
+      
+      setIsAuthenticated(authenticated);
+      setUserRoles(roles || []);
+      
+      if (!authenticated) {
+        showMessage('Debes iniciar sesión para acceder a esta función', 'error');
+        return;
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // Función para verificar si el usuario tiene rol de administrador
+  const isAdmin = (): boolean => {
+    return userRoles.includes('ROLE_ADMIN');
+  };
+
+  // Función para verificar si el usuario tiene rol de usuario o administrador
+  const isUserOrAdmin = (): boolean => {
+    return userRoles.includes('ROLE_USER') || userRoles.includes('ROLE_ADMIN');
+  };
+
   // Función para mostrar mensajes
   const showMessage = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
     setMessage({ text, type });
@@ -58,6 +89,11 @@ const OperationsManager: React.FC = () => {
 
   // Obtener reservas
   const fetchReservations = async () => {
+    if (!isAuthenticated) {
+      showMessage('Debes iniciar sesión para ver las reservas', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(API_BASE_URL);
@@ -78,6 +114,12 @@ const OperationsManager: React.FC = () => {
   // Crear nueva reserva
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAuthenticated || !isUserOrAdmin()) {
+      showMessage('No tienes permisos para crear reservas', 'error');
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -117,8 +159,13 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Eliminar reserva
+  // Eliminar reserva - Solo ADMIN
   const handleDelete = async (id: string) => {
+    if (!isAdmin()) {
+      showMessage('Solo los administradores pueden eliminar reservas', 'error');
+      return;
+    }
+
     if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva?')) return;
     
     try {
@@ -137,8 +184,13 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Entrega de hardware
+  // Entrega de hardware - Solo ADMIN
   const handleHandOver = async () => {
+    if (!isAdmin()) {
+      showMessage('Solo los administradores pueden realizar entregas', 'error');
+      return;
+    }
+
     if (!reservationId) {
       showMessage('Por favor ingresa un ID de reserva', 'error');
       return;
@@ -162,8 +214,13 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Devolución de hardware
+  // Devolución de hardware - Solo ADMIN
   const handleReturn = async () => {
+    if (!isAdmin()) {
+      showMessage('Solo los administradores pueden procesar devoluciones', 'error');
+      return;
+    }
+
     if (!reservationId) {
       showMessage('Por favor ingresa un ID de reserva', 'error');
       return;
@@ -202,13 +259,36 @@ const OperationsManager: React.FC = () => {
     }
   }, [activeTab]);
 
+  // Si no está autenticado, mostrar mensaje
+  if (!isAuthenticated) {
+    return (
+      <div className="container-fluid py-4">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card">
+              <div className="card-body text-center">
+                <h5 className="card-title">Acceso Restringido</h5>
+                <p className="card-text">Debes iniciar sesión para acceder al sistema de reservas.</p>
+                <button className="btn btn-primary">Iniciar Sesión</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container-fluid py-4">
       {/* Header */}
       <div className="row mb-4">
         <div className="col-12 text-center">
           <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Hardware</h1>
-          <p className="lead text-muted">Gestiona las reservas y disponibilidad de hardware</p>
+          <p className="lead text-muted">
+            Gestiona las reservas y disponibilidad de hardware
+            {isAdmin() && <span className="badge bg-danger ms-2">ADMINISTRADOR</span>}
+            {!isAdmin() && isUserOrAdmin() && <span className="badge bg-primary ms-2">USUARIO</span>}
+          </p>
         </div>
       </div>
 
@@ -236,30 +316,36 @@ const OperationsManager: React.FC = () => {
                 📋 Disponibilidad
               </button>
             </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'create' ? 'active' : ''}`}
-                onClick={() => setActiveTab('create')}
-              >
-                ➕ Nueva Reserva
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'reservations' ? 'active' : ''}`}
-                onClick={() => setActiveTab('reservations')}
-              >
-                📅 Mis Reservas
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'actions' ? 'active' : ''}`}
-                onClick={() => setActiveTab('actions')}
-              >
-                ⚡ Acciones
-              </button>
-            </li>
+            {isUserOrAdmin() && (
+              <>
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link ${activeTab === 'create' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('create')}
+                  >
+                    ➕ Nueva Reserva
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button 
+                    className={`nav-link ${activeTab === 'reservations' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('reservations')}
+                  >
+                    📅 Mis Reservas
+                  </button>
+                </li>
+              </>
+            )}
+            {isAdmin() && (
+              <li className="nav-item">
+                <button 
+                  className={`nav-link ${activeTab === 'actions' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('actions')}
+                >
+                  ⚡ Acciones
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </div>
@@ -267,7 +353,7 @@ const OperationsManager: React.FC = () => {
       {/* Contenido */}
       <div className="row">
         <div className="col-12">
-          {/* Tab de Disponibilidad - Ahora usa AvailableHardwareTab */}
+          {/* Tab de Disponibilidad */}
           {activeTab === 'availability' && (
             <div className="card shadow">
               <div className="card-body">
@@ -282,8 +368,8 @@ const OperationsManager: React.FC = () => {
             <div className="card shadow">
               <div className="card-body">
                 
-                {/* Tab de Nueva Reserva */}
-                {activeTab === 'create' && (
+                {/* Tab de Nueva Reserva - Solo ROLE_USER y ROLE_ADMIN */}
+                {activeTab === 'create' && isUserOrAdmin() && (
                   <div>
                     <h2 className="card-title mb-4">Nueva Reserva</h2>
                     
@@ -392,8 +478,8 @@ const OperationsManager: React.FC = () => {
                   </div>
                 )}
 
-                {/* Tab de Reservas */}
-                {activeTab === 'reservations' && (
+                {/* Tab de Reservas - Solo ROLE_USER y ROLE_ADMIN */}
+                {activeTab === 'reservations' && isUserOrAdmin() && (
                   <div>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                       <h2 className="card-title mb-0">Mis Reservas</h2>
@@ -427,12 +513,16 @@ const OperationsManager: React.FC = () => {
                             <div className="card">
                               <div className="card-header d-flex justify-content-between align-items-center">
                                 <h5 className="card-title mb-0">Reserva #{reservation.id || index + 1}</h5>
-                                <button
-                                  onClick={() => handleDelete(reservation.id || String(index + 1))}
-                                  className="btn btn-outline-danger btn-sm"
-                                >
-                                  🗑️ Eliminar
-                                </button>
+                                {/* Botón eliminar - Solo ADMIN */}
+                                {isAdmin() && (
+                                  <button
+                                    onClick={() => handleDelete(reservation.id || String(index + 1))}
+                                    className="btn btn-outline-danger btn-sm"
+                                    title="Solo administradores pueden eliminar reservas"
+                                  >
+                                    🗑️ Eliminar
+                                  </button>
+                                )}
                               </div>
                               <div className="card-body">
                                 <pre className="small bg-light p-2 rounded">
@@ -454,10 +544,13 @@ const OperationsManager: React.FC = () => {
                   </div>
                 )}
 
-                {/* Tab de Acciones */}
-                {activeTab === 'actions' && (
+                {/* Tab de Acciones - Solo ROLE_ADMIN */}
+                {activeTab === 'actions' && isAdmin() && (
                   <div>
-                    <h2 className="card-title mb-4">Acciones de Reserva</h2>
+                    <h2 className="card-title mb-4">
+                      Acciones de Reserva 
+                      <span className="badge bg-danger ms-2">Solo Administradores</span>
+                    </h2>
                     
                     <div className="mb-4">
                       <label className="form-label">ID de Reserva</label>

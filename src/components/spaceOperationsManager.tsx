@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import AvailableSpacesTab from '../pages/Availability/components/AvailableSpaceTab'; // Ajusta la ruta según tu estructura
+import AvailableSpacesTab from '../pages/Availability/components/AvailableSpaceTab';
+import { getRoles, isLoggedIn } from '../services/auth'; 
 
 // Tipos para TypeScript
 interface SpaceReservation {
@@ -30,6 +31,7 @@ const SpaceOperationsManager: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<Message>({ text: '', type: 'info' });
   const [reservations, setReservations] = useState<SpaceReservation[]>([]);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   // Estado para el formulario de nueva reserva de espacio
   const [formData, setFormData] = useState<SpaceReservation>({
@@ -47,6 +49,24 @@ const SpaceOperationsManager: React.FC = () => {
     conditionRate: 5,
     serviceRate: 5
   });
+
+  // Verificar roles del usuario
+  useEffect(() => {
+    if (isLoggedIn()) {
+      const roles = getRoles();
+      setUserRoles(roles || []);
+    }
+  }, []);
+
+  // Función para verificar si el usuario es admin
+  const isAdmin = (): boolean => {
+    return userRoles.includes('ROLE_ADMIN');
+  };
+
+  // Función para verificar si el usuario tiene acceso (admin o user)
+  const hasUserAccess = (): boolean => {
+    return userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_USER');
+  };
 
   // Función para mostrar mensajes
   const showMessage = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -113,8 +133,13 @@ const SpaceOperationsManager: React.FC = () => {
     }
   };
 
-  // Eliminar reserva de espacio
+  // Eliminar reserva de espacio (solo para admin)
   const handleDelete = async (id: string) => {
+    if (!isAdmin()) {
+      showMessage('No tienes permisos para eliminar reservas', 'error');
+      return;
+    }
+
     if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva de espacio?')) return;
     
     try {
@@ -133,8 +158,13 @@ const SpaceOperationsManager: React.FC = () => {
     }
   };
 
-  // Entrega de espacio
+  // Entrega de espacio (solo para admin)
   const handleHandOver = async () => {
+    if (!isAdmin()) {
+      showMessage('No tienes permisos para realizar esta acción', 'error');
+      return;
+    }
+
     if (!reservationId) {
       showMessage('Por favor ingresa un ID de reserva', 'error');
       return;
@@ -158,8 +188,13 @@ const SpaceOperationsManager: React.FC = () => {
     }
   };
 
-  // Devolución de espacio
+  // Devolución de espacio (solo para admin)
   const handleReturn = async () => {
+    if (!isAdmin()) {
+      showMessage('No tienes permisos para realizar esta acción', 'error');
+      return;
+    }
+
     if (!reservationId) {
       showMessage('Por favor ingresa un ID de reserva', 'error');
       return;
@@ -198,6 +233,22 @@ const SpaceOperationsManager: React.FC = () => {
     }
   }, [activeTab]);
 
+  // Verificar si el usuario tiene acceso a la aplicación
+  if (!hasUserAccess()) {
+    return (
+      <div className="container-fluid py-4">
+        <div className="row">
+          <div className="col-12">
+            <div className="alert alert-danger text-center">
+              <h3>Acceso Denegado</h3>
+              <p>No tienes permisos para acceder a esta funcionalidad.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container-fluid py-4">
       {/* Header */}
@@ -205,6 +256,9 @@ const SpaceOperationsManager: React.FC = () => {
         <div className="col-12 text-center">
           <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Espacios</h1>
           <p className="lead text-muted">Gestiona las reservas y disponibilidad de espacios</p>
+          {isAdmin() && (
+            <div className="badge bg-success">Administrador</div>
+          )}
         </div>
       </div>
 
@@ -248,14 +302,17 @@ const SpaceOperationsManager: React.FC = () => {
                 📅 Mis Reservas
               </button>
             </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link ${activeTab === 'actions' ? 'active' : ''}`}
-                onClick={() => setActiveTab('actions')}
-              >
-                ⚡ Acciones
-              </button>
-            </li>
+            {/* Tab de Acciones solo para admin */}
+            {isAdmin() && (
+              <li className="nav-item">
+                <button 
+                  className={`nav-link ${activeTab === 'actions' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('actions')}
+                >
+                  ⚡ Acciones
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </div>
@@ -410,12 +467,15 @@ const SpaceOperationsManager: React.FC = () => {
                             <div className="card">
                               <div className="card-header d-flex justify-content-between align-items-center">
                                 <h5 className="card-title mb-0">Reserva de Espacio #{reservation.id || index + 1}</h5>
-                                <button
-                                  onClick={() => handleDelete(reservation.id || String(index + 1))}
-                                  className="btn btn-outline-danger btn-sm"
-                                >
-                                  🗑️ Eliminar
-                                </button>
+                                {/* Botón de eliminar solo para admin */}
+                                {isAdmin() && (
+                                  <button
+                                    onClick={() => handleDelete(reservation.id || String(index + 1))}
+                                    className="btn btn-outline-danger btn-sm"
+                                  >
+                                    🗑️ Eliminar
+                                  </button>
+                                )}
                               </div>
                               <div className="card-body">
                                 <div className="row">
@@ -446,8 +506,8 @@ const SpaceOperationsManager: React.FC = () => {
                   </div>
                 )}
 
-                {/* Tab de Acciones */}
-                {activeTab === 'actions' && (
+                {/* Tab de Acciones - Solo para admin */}
+                {activeTab === 'actions' && isAdmin() && (
                   <div>
                     <h2 className="card-title mb-4">Acciones de Reserva de Espacio</h2>
                     
