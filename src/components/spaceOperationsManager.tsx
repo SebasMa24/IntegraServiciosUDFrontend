@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import AvailableSpacesTab from '../pages/Availability/components/AvailableSpaceTab';
-import { getRoles, isLoggedIn } from '../services/auth'; 
+import { getRoles, isLoggedIn, getSub } from '../services/auth'; 
 
 // Tipos para TypeScript
 interface SpaceReservation {
   id?: string;
+  reservationCode?: number; // Para mostrar código de reserva
   building: number;
   resourceCode: number;
   requester: string;
   manager: string;
   start: string;
   end: string;
+  handover?: string; //Fecha de entrega
+  returnTime?: string; //Fecha de devolución
+  conditionRate?: number; //Calificación de condición
+  serviceRate?: number; //Calificación de servicio
+  status?: string; //Estado de la reserva
 }
 
 interface ReturnData {
@@ -32,6 +38,7 @@ const SpaceOperationsManager: React.FC = () => {
   const [message, setMessage] = useState<Message>({ text: '', type: 'info' });
   const [reservations, setReservations] = useState<SpaceReservation[]>([]);
   const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [userSub, setUserSub] = useState<string>('');
 
   // Estado para el formulario de nueva reserva de espacio
   const [formData, setFormData] = useState<SpaceReservation>({
@@ -54,7 +61,17 @@ const SpaceOperationsManager: React.FC = () => {
   useEffect(() => {
     if (isLoggedIn()) {
       const roles = getRoles();
+      const sub = getSub();
       setUserRoles(roles || []);
+      setUserSub(sub || '');
+      
+      // Auto-llenar el campo requester si es ROLE_USER
+      if (roles?.includes('ROLE_USER') && !roles?.includes('ROLE_ADMIN') && sub) {
+        setFormData(prevData => ({
+          ...prevData,
+          requester: sub
+        }));
+      }
     }
   }, []);
 
@@ -66,6 +83,47 @@ const SpaceOperationsManager: React.FC = () => {
   // Función para verificar si el usuario tiene acceso (admin o user)
   const hasUserAccess = (): boolean => {
     return userRoles.includes('ROLE_ADMIN') || userRoles.includes('ROLE_USER');
+  };
+
+  // Función para verificar si el usuario es solo ROLE_USER (no admin)
+  const isOnlyUser = (): boolean => {
+    return userRoles.includes('ROLE_USER') && !userRoles.includes('ROLE_ADMIN');
+  };
+
+  //Función para obtener el color del badge según el status
+  const getStatusBadgeClass = (status?: string): string => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return 'bg-primary';
+      case 'pending':
+        return 'bg-warning';
+      case 'completed':
+        return 'bg-success';
+      case 'past':
+        return 'bg-secondary';
+      case 'cancelled':
+        return 'bg-danger';
+      default:
+        return 'bg-info';
+    }
+  };
+
+  //Función para obtener el texto del status en español
+  const getStatusText = (status?: string): string => {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return 'Activa';
+      case 'pending':
+        return 'Pendiente';
+      case 'completed':
+        return 'Completada';
+      case 'past':
+        return 'Pasada';
+      case 'cancelled':
+        return 'Cancelada';
+      default:
+        return status || 'Sin estado';
+    }
   };
 
   // Función para mostrar mensajes
@@ -81,7 +139,23 @@ const SpaceOperationsManager: React.FC = () => {
       const response = await fetch(API_BASE_URL);
       if (response.ok) {
         const data = await response.json();
-        setReservations(Array.isArray(data) ? data : []);
+        const allReservations = Array.isArray(data) ? data : [];
+        
+        // Filtrar reservas según el rol del usuario
+        let filteredReservations = allReservations;
+        if (isAdmin()) {
+          // Si es admin, filtrar solo las reservas donde el usuario es el gerente
+          filteredReservations = allReservations.filter(reservation => 
+            reservation.manager === userSub
+          );
+        } else if (userSub) {
+          // Si no es admin, filtrar solo las reservas donde el usuario es el solicitante
+          filteredReservations = allReservations.filter(reservation => 
+            reservation.requester === userSub
+          );
+        }
+        
+        setReservations(filteredReservations);
         showMessage('Reservas de espacios actualizadas', 'success');
       } else {
         showMessage('Error al obtener reservas de espacios', 'error');
@@ -118,7 +192,7 @@ const SpaceOperationsManager: React.FC = () => {
         setFormData({
           building: 0,
           resourceCode: 0,
-          requester: '',
+          requester: isOnlyUser() ? userSub : '', // Mantener el sub si es solo user
           manager: '',
           start: '',
           end: ''
@@ -178,6 +252,8 @@ const SpaceOperationsManager: React.FC = () => {
       
       if (response.ok) {
         showMessage('Entrega de espacio realizada exitosamente', 'success');
+        //Limpiar el campo después de la acción exitosa
+        setReservationId('');
       } else {
         showMessage('Error al realizar la entrega del espacio', 'error');
       }
@@ -371,10 +447,22 @@ const SpaceOperationsManager: React.FC = () => {
                             type="email"
                             className="form-control"
                             value={formData.requester}
-                            onChange={(e) => setFormData({...formData, requester: e.target.value})}
+                            onChange={(e) => {
+                              // Solo permitir cambios si es admin o si no es solo user
+                              if (isAdmin() || !isOnlyUser()) {
+                                setFormData({...formData, requester: e.target.value});
+                              }
+                            }}
                             placeholder="usuario@example.com"
                             required
+                            disabled={isOnlyUser()} // Deshabilitado si es solo user
+                            style={isOnlyUser() ? { backgroundColor: '#e9ecef', cursor: 'not-allowed' } : {}}
                           />
+                          {isOnlyUser() && (
+                            <small className="form-text text-muted">
+                              Este campo se llena automáticamente con tu usuario
+                            </small>
+                          )}
                         </div>
                         
                         <div className="col-md-6">
@@ -432,11 +520,13 @@ const SpaceOperationsManager: React.FC = () => {
                   </div>
                 )}
 
-                {/* Tab de Reservas */}
+                {/* MEJORADO: Tab de Reservas con badges de estado y más información */}
                 {activeTab === 'reservations' && (
                   <div>
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h2 className="card-title mb-0">Mis Reservas de Espacios</h2>
+                      <h2 className="card-title mb-0">
+                        {isAdmin() ? 'Reservas que Gestiono' : 'Mis Reservas de Espacios'}
+                      </h2>
                       <button
                         onClick={fetchReservations}
                         disabled={loading}
@@ -466,7 +556,17 @@ const SpaceOperationsManager: React.FC = () => {
                           <div key={reservation.id || index} className="col-12 mb-3">
                             <div className="card">
                               <div className="card-header d-flex justify-content-between align-items-center">
-                                <h5 className="card-title mb-0">Reserva de Espacio #{reservation.id || index + 1}</h5>
+                                <div className="d-flex align-items-center gap-3">
+                                  <h5 className="card-title mb-0">
+                                    Reserva de Espacio #{reservation.reservationCode || reservation.id || index + 1}
+                                  </h5>
+                                  {/*Badge de estado */}
+                                  {reservation.status && (
+                                    <span className={`badge ${getStatusBadgeClass(reservation.status)}`}>
+                                      {getStatusText(reservation.status)}
+                                    </span>
+                                  )}
+                                </div>
                                 {/* Botón de eliminar solo para admin */}
                                 {isAdmin() && (
                                   <button
@@ -480,6 +580,10 @@ const SpaceOperationsManager: React.FC = () => {
                               <div className="card-body">
                                 <div className="row">
                                   <div className="col-md-6">
+                                    {/*Mostrar código de reserva si existe */}
+                                    {reservation.reservationCode && (
+                                      <p><strong>Código de Reserva:</strong> {reservation.reservationCode}</p>
+                                    )}
                                     <p><strong>Edificio:</strong> {reservation.building}</p>
                                     <p><strong>Código de Espacio:</strong> {reservation.resourceCode}</p>
                                     <p><strong>Solicitante:</strong> {reservation.requester}</p>
@@ -488,8 +592,36 @@ const SpaceOperationsManager: React.FC = () => {
                                     <p><strong>Gerente:</strong> {reservation.manager}</p>
                                     <p><strong>Inicio:</strong> {new Date(reservation.start).toLocaleString()}</p>
                                     <p><strong>Fin:</strong> {new Date(reservation.end).toLocaleString()}</p>
+                                    {/*Mostrar fechas de entrega y devolución si existen */}
+                                    {reservation.handover && (
+                                      <p><strong>Entrega:</strong> {new Date(reservation.handover).toLocaleString()}</p>
+                                    )}
+                                    {reservation.returnTime && (
+                                      <p><strong>Devolución:</strong> {new Date(reservation.returnTime).toLocaleString()}</p>
+                                    )}
                                   </div>
                                 </div>
+                                
+                                {/*Mostrar calificaciones si existen */}
+                                {(reservation.conditionRate || reservation.serviceRate) && (
+                                  <div className="mt-3 pt-3 border-top">
+                                    <h6 className="text-muted mb-2">Calificaciones:</h6>
+                                    <div className="row">
+                                      {reservation.conditionRate && (
+                                        <div className="col-md-6">
+                                          <small className="text-muted">Condición: </small>
+                                          <span className="badge bg-info">{reservation.conditionRate}/5</span>
+                                        </div>
+                                      )}
+                                      {reservation.serviceRate && (
+                                        <div className="col-md-6">
+                                          <small className="text-muted">Servicio: </small>
+                                          <span className="badge bg-info">{reservation.serviceRate}/5</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -499,7 +631,9 @@ const SpaceOperationsManager: React.FC = () => {
                       <div className="text-center py-5">
                         <div className="text-muted">
                           <i className="bi bi-calendar-x display-1"></i>
-                          <p className="mt-3">No tienes reservas de espacios activas</p>
+                          <p className="mt-3">
+                            {isAdmin() ? 'No hay reservas de espacios que gestiones' : 'No tienes reservas de espacios activas'}
+                          </p>
                         </div>
                       </div>
                     )}
