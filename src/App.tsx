@@ -13,6 +13,7 @@ import OperationSpaceDetails from "./pages/Operation/OperationSpaceDetails";
 import StoredHardwareDetails from "./pages/Availability/StoredHardwareDetails";
 import SpaceDetails from "./pages/Availability/SpaceDetails";
 import './App.css';
+import Reservation from "./pages/Reservation";
 
 const App: React.FC = () => {
   return (
@@ -32,6 +33,7 @@ const App: React.FC = () => {
             <Route path="/availability" element={<Availability />} />
             <Route path="/availability/details/hardware/:id" element={<StoredHardwareDetails />} />
             <Route path="/availability/details/space/:id" element={<SpaceDetails />} />
+            <Route path="/reservations" element={<Reservation />} />
           </Routes>
         </main>
         <Footer /> {/* Footer siempre al final */}

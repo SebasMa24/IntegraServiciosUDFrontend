@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import AvailableHardwareTab from '../pages/Availability/components/AvailableHardwareTab';
+import AvailableSpacesTab from '../pages/Availability/components/AvailableSpaceTab';
 import { getRoles, isLoggedIn, getSub } from '../services/auth'; 
 
 // Tipos para TypeScript
-interface Reservation {
+interface SpaceReservation {
   id?: string;
-  reservationCode?: number; // Agregado
+  reservationCode?: number; // Para mostrar código de reserva
   building: number;
   resourceCode: number;
-  storedResourceCode: number;
   requester: string;
   manager: string;
   start: string;
   end: string;
-  handover?: string; // Agregado
-  returnTime?: string; // Agregado
-  conditionRate?: number; // Agregado
-  serviceRate?: number; // Agregado
-  status?: string; // Agregado
+  handover?: string; //Fecha de entrega
+  returnTime?: string; //Fecha de devolución
+  conditionRate?: number; //Calificación de condición
+  serviceRate?: number; //Calificación de servicio
+  status?: string; //Estado de la reserva
 }
 
 interface ReturnData {
@@ -31,21 +30,20 @@ interface Message {
 }
 
 // Configuración de la API
-const API_BASE_URL = 'https://operationmanagement.onrender.com/api/operations/hardware';
+const API_BASE_URL = 'https://operationmanagement.onrender.com/api/operations/space';
 
-const OperationsManager: React.FC = () => {
+const SpaceOperationsManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('availability');
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<Message>({ text: '', type: 'info' });
-  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [reservations, setReservations] = useState<SpaceReservation[]>([]);
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [userSub, setUserSub] = useState<string>('');
 
-  // Estado para el formulario de nueva reserva
-  const [formData, setFormData] = useState<Reservation>({
+  // Estado para el formulario de nueva reserva de espacio
+  const [formData, setFormData] = useState<SpaceReservation>({
     building: 0,
     resourceCode: 0,
-    storedResourceCode: 0,
     requester: '',
     manager: '',
     start: '',
@@ -92,7 +90,7 @@ const OperationsManager: React.FC = () => {
     return userRoles.includes('ROLE_USER') && !userRoles.includes('ROLE_ADMIN');
   };
 
-  // Función para obtener el color del badge según el status
+  //Función para obtener el color del badge según el status
   const getStatusBadgeClass = (status?: string): string => {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -110,7 +108,7 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Función para obtener el texto del status en español
+  //Función para obtener el texto del status en español
   const getStatusText = (status?: string): string => {
     switch (status?.toLowerCase()) {
       case 'active':
@@ -134,7 +132,7 @@ const OperationsManager: React.FC = () => {
     setTimeout(() => setMessage({ text: '', type: 'info' }), 3000);
   };
 
-  // Obtener reservas
+  // Obtener reservas de espacios
   const fetchReservations = async () => {
     setLoading(true);
     try {
@@ -158,9 +156,9 @@ const OperationsManager: React.FC = () => {
         }
         
         setReservations(filteredReservations);
-        showMessage('Reservas de hardware actualizadas', 'success');
+        showMessage('Reservas de espacios actualizadas', 'success');
       } else {
-        showMessage('Error al obtener reservas de hardware', 'error');
+        showMessage('Error al obtener reservas de espacios', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -169,7 +167,7 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Crear nueva reserva
+  // Crear nueva reserva de espacio
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -178,8 +176,7 @@ const OperationsManager: React.FC = () => {
       const payload = {
         ...formData,
         building: Number(formData.building),
-        resourceCode: Number(formData.resourceCode),
-        storedResourceCode: Number(formData.storedResourceCode)
+        resourceCode: Number(formData.resourceCode)
       };
 
       const response = await fetch(API_BASE_URL, {
@@ -191,18 +188,17 @@ const OperationsManager: React.FC = () => {
       });
 
       if (response.ok) {
-        showMessage('Reserva de hardware creada exitosamente', 'success');
+        showMessage('Reserva de espacio creada exitosamente', 'success');
         setFormData({
           building: 0,
           resourceCode: 0,
-          storedResourceCode: 0,
           requester: isOnlyUser() ? userSub : '', // Mantener el sub si es solo user
           manager: '',
           start: '',
           end: ''
         });
       } else {
-        showMessage('Error al crear la reserva de hardware', 'error');
+        showMessage('Error al crear la reserva de espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -211,14 +207,14 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Eliminar reserva de hardware (solo para admin)
+  // Eliminar reserva de espacio (solo para admin)
   const handleDelete = async (id: string) => {
     if (!isAdmin()) {
       showMessage('No tienes permisos para eliminar reservas', 'error');
       return;
     }
 
-    if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva de hardware?')) return;
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta reserva de espacio?')) return;
     
     try {
       const response = await fetch(`${API_BASE_URL}/${id}`, {
@@ -226,17 +222,17 @@ const OperationsManager: React.FC = () => {
       });
       
       if (response.ok) {
-        showMessage('Reserva de hardware eliminada exitosamente', 'success');
+        showMessage('Reserva de espacio eliminada exitosamente', 'success');
         fetchReservations();
       } else {
-        showMessage('Error al eliminar la reserva de hardware', 'error');
+        showMessage('Error al eliminar la reserva de espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
     }
   };
 
-  // Entrega de hardware (solo para admin)
+  // Entrega de espacio (solo para admin)
   const handleHandOver = async () => {
     if (!isAdmin()) {
       showMessage('No tienes permisos para realizar esta acción', 'error');
@@ -255,9 +251,11 @@ const OperationsManager: React.FC = () => {
       });
       
       if (response.ok) {
-        showMessage('Entrega de hardware realizada exitosamente', 'success');
+        showMessage('Entrega de espacio realizada exitosamente', 'success');
+        //Limpiar el campo después de la acción exitosa
+        setReservationId('');
       } else {
-        showMessage('Error al realizar la entrega del hardware', 'error');
+        showMessage('Error al realizar la entrega del espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -266,7 +264,7 @@ const OperationsManager: React.FC = () => {
     }
   };
 
-  // Devolución de hardware (solo para admin)
+  // Devolución de espacio (solo para admin)
   const handleReturn = async () => {
     if (!isAdmin()) {
       showMessage('No tienes permisos para realizar esta acción', 'error');
@@ -292,11 +290,11 @@ const OperationsManager: React.FC = () => {
       });
       
       if (response.ok) {
-        showMessage('Devolución de hardware realizada exitosamente', 'success');
+        showMessage('Devolución de espacio realizada exitosamente', 'success');
         setReservationId('');
         setReturnData({ conditionRate: 5, serviceRate: 5 });
       } else {
-        showMessage('Error al realizar la devolución del hardware', 'error');
+        showMessage('Error al realizar la devolución del espacio', 'error');
       }
     } catch (error) {
       showMessage('Error de conexión', 'error');
@@ -332,8 +330,8 @@ const OperationsManager: React.FC = () => {
       {/* Header */}
       <div className="row mb-4">
         <div className="col-12 text-center">
-          <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Hardware</h1>
-          <p className="lead text-muted">Gestiona las reservas y disponibilidad de hardware</p>
+          <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Espacios</h1>
+          <p className="lead text-muted">Gestiona las reservas y disponibilidad de espacios</p>
           {isAdmin() && (
             <div className="badge bg-success">Administrador</div>
           )}
@@ -361,7 +359,7 @@ const OperationsManager: React.FC = () => {
                 className={`nav-link ${activeTab === 'availability' ? 'active' : ''}`}
                 onClick={() => setActiveTab('availability')}
               >
-                📋 Disponibilidad
+                🏢 Disponibilidad
               </button>
             </li>
             <li className="nav-item">
@@ -398,11 +396,11 @@ const OperationsManager: React.FC = () => {
       {/* Contenido */}
       <div className="row">
         <div className="col-12">
-          {/* Tab de Disponibilidad - Usando AvailableHardwareTab */}
+          {/* Tab de Disponibilidad - Usando AvailableSpacesTab */}
           {activeTab === 'availability' && (
             <div className="card shadow">
               <div className="card-body">
-                <AvailableHardwareTab />
+                <AvailableSpacesTab />
               </div>
             </div>
           )}
@@ -415,7 +413,7 @@ const OperationsManager: React.FC = () => {
                 {/* Tab de Nueva Reserva */}
                 {activeTab === 'create' && (
                   <div>
-                    <h2 className="card-title mb-4">Nueva Reserva de Hardware</h2>
+                    <h2 className="card-title mb-4">Nueva Reserva de Espacio</h2>
                     
                     <form onSubmit={handleSubmit}>
                       <div className="row g-3">
@@ -432,25 +430,13 @@ const OperationsManager: React.FC = () => {
                         </div>
                         
                         <div className="col-md-6">
-                          <label className="form-label">Código de Recurso</label>
+                          <label className="form-label">Código de Espacio</label>
                           <input
                             type="number"
                             className="form-control"
                             value={formData.resourceCode}
                             onChange={(e) => setFormData({...formData, resourceCode: Number(e.target.value)})}
-                            placeholder="Código del recurso"
-                            required
-                          />
-                        </div>
-                        
-                        <div className="col-md-6">
-                          <label className="form-label">Código de Recurso Almacenado</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={formData.storedResourceCode}
-                            onChange={(e) => setFormData({...formData, storedResourceCode: Number(e.target.value)})}
-                            placeholder="Código del recurso almacenado"
+                            placeholder="Código del espacio (ej: 102)"
                             required
                           />
                         </div>
@@ -526,7 +512,7 @@ const OperationsManager: React.FC = () => {
                               Creando Reserva...
                             </>
                           ) : (
-                            'Crear Reserva de Hardware'
+                            'Crear Reserva de Espacio'
                           )}
                         </button>
                       </div>
@@ -534,12 +520,12 @@ const OperationsManager: React.FC = () => {
                   </div>
                 )}
 
-                {/* Tab de Reservas - ACTUALIZADO */}
+                {/* MEJORADO: Tab de Reservas con badges de estado y más información */}
                 {activeTab === 'reservations' && (
                   <div>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                       <h2 className="card-title mb-0">
-                        {isAdmin() ? 'Reservas que Gestiono' : 'Mis Reservas de Hardware'}
+                        {isAdmin() ? 'Reservas que Gestiono' : 'Mis Reservas de Espacios'}
                       </h2>
                       <button
                         onClick={fetchReservations}
@@ -562,7 +548,7 @@ const OperationsManager: React.FC = () => {
                         <div className="spinner-border text-primary" role="status">
                           <span className="visually-hidden">Cargando...</span>
                         </div>
-                        <p className="mt-3">Cargando reservas de hardware...</p>
+                        <p className="mt-3">Cargando reservas de espacios...</p>
                       </div>
                     ) : reservations.length > 0 ? (
                       <div className="row">
@@ -572,12 +558,14 @@ const OperationsManager: React.FC = () => {
                               <div className="card-header d-flex justify-content-between align-items-center">
                                 <div className="d-flex align-items-center gap-3">
                                   <h5 className="card-title mb-0">
-                                    Reserva #{reservation.reservationCode || reservation.id || index + 1}
+                                    Reserva de Espacio #{reservation.reservationCode || reservation.id || index + 1}
                                   </h5>
-                                  {/* Badge de estado */}
-                                  <span className={`badge ${getStatusBadgeClass(reservation.status)}`}>
-                                    {getStatusText(reservation.status)}
-                                  </span>
+                                  {/*Badge de estado */}
+                                  {reservation.status && (
+                                    <span className={`badge ${getStatusBadgeClass(reservation.status)}`}>
+                                      {getStatusText(reservation.status)}
+                                    </span>
+                                  )}
                                 </div>
                                 {/* Botón de eliminar solo para admin */}
                                 {isAdmin() && (
@@ -592,16 +580,19 @@ const OperationsManager: React.FC = () => {
                               <div className="card-body">
                                 <div className="row">
                                   <div className="col-md-6">
-                                    <p><strong>Código de Reserva:</strong> {reservation.reservationCode || 'No disponible'}</p>
+                                    {/*Mostrar código de reserva si existe */}
+                                    {reservation.reservationCode && (
+                                      <p><strong>Código de Reserva:</strong> {reservation.reservationCode}</p>
+                                    )}
                                     <p><strong>Edificio:</strong> {reservation.building}</p>
-                                    <p><strong>Código de Recurso:</strong> {reservation.resourceCode}</p>
-                                    <p><strong>Código Almacenado:</strong> {reservation.storedResourceCode}</p>
+                                    <p><strong>Código de Espacio:</strong> {reservation.resourceCode}</p>
                                     <p><strong>Solicitante:</strong> {reservation.requester}</p>
                                   </div>
                                   <div className="col-md-6">
                                     <p><strong>Gerente:</strong> {reservation.manager}</p>
                                     <p><strong>Inicio:</strong> {new Date(reservation.start).toLocaleString()}</p>
                                     <p><strong>Fin:</strong> {new Date(reservation.end).toLocaleString()}</p>
+                                    {/*Mostrar fechas de entrega y devolución si existen */}
                                     {reservation.handover && (
                                       <p><strong>Entrega:</strong> {new Date(reservation.handover).toLocaleString()}</p>
                                     )}
@@ -611,7 +602,7 @@ const OperationsManager: React.FC = () => {
                                   </div>
                                 </div>
                                 
-                                {/* Mostrar calificaciones si existen */}
+                                {/*Mostrar calificaciones si existen */}
                                 {(reservation.conditionRate || reservation.serviceRate) && (
                                   <div className="mt-3 pt-3 border-top">
                                     <h6 className="text-muted mb-2">Calificaciones:</h6>
@@ -641,7 +632,7 @@ const OperationsManager: React.FC = () => {
                         <div className="text-muted">
                           <i className="bi bi-calendar-x display-1"></i>
                           <p className="mt-3">
-                            {isAdmin() ? 'No hay reservas de hardware que gestiones' : 'No tienes reservas de hardware activas'}
+                            {isAdmin() ? 'No hay reservas de espacios que gestiones' : 'No tienes reservas de espacios activas'}
                           </p>
                         </div>
                       </div>
@@ -652,7 +643,7 @@ const OperationsManager: React.FC = () => {
                 {/* Tab de Acciones - Solo para admin */}
                 {activeTab === 'actions' && isAdmin() && (
                   <div>
-                    <h2 className="card-title mb-4">Acciones de Reserva de Hardware</h2>
+                    <h2 className="card-title mb-4">Acciones de Reserva de Espacio</h2>
                     
                     <div className="mb-4">
                       <label className="form-label">ID de Reserva</label>
@@ -661,7 +652,7 @@ const OperationsManager: React.FC = () => {
                         className="form-control"
                         value={reservationId}
                         onChange={(e) => setReservationId(e.target.value)}
-                        placeholder="Ingresa el ID de la reserva de hardware"
+                        placeholder="Ingresa el ID de la reserva de espacio"
                       />
                     </div>
 
@@ -670,10 +661,10 @@ const OperationsManager: React.FC = () => {
                       <div className="col-md-6">
                         <div className="card border-primary">
                           <div className="card-header bg-primary text-white">
-                            <h5 className="card-title mb-0">📦 Entrega de Hardware</h5>
+                            <h5 className="card-title mb-0">🏢 Entrega de Espacio</h5>
                           </div>
                           <div className="card-body">
-                            <p className="card-text">Marca el hardware como entregado al usuario</p>
+                            <p className="card-text">Marca el espacio como entregado al usuario</p>
                             <button
                               onClick={handleHandOver}
                               disabled={loading || !reservationId}
@@ -696,10 +687,10 @@ const OperationsManager: React.FC = () => {
                       <div className="col-md-6">
                         <div className="card border-success">
                           <div className="card-header bg-success text-white">
-                            <h5 className="card-title mb-0">🔄 Devolución de Hardware</h5>
+                            <h5 className="card-title mb-0">🔄 Devolución de Espacio</h5>
                           </div>
                           <div className="card-body">
-                            <p className="card-text">Procesa la devolución del hardware con calificaciones</p>
+                            <p className="card-text">Procesa la devolución del espacio con calificaciones</p>
                             
                             <div className="row g-3 mb-3">
                               <div className="col-6">
@@ -757,4 +748,4 @@ const OperationsManager: React.FC = () => {
   );
 };
 
-export default OperationsManager;
+export default SpaceOperationsManager;

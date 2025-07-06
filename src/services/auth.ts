@@ -35,6 +35,18 @@ export const getRoles = (): string[] | null => {
   }
 };
 
+export const getSub = (): string | null => {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const decoded: any = jwtDecode(token);
+    return decoded.sub || null;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
+
 export function isLoggedIn(): boolean {
   const token = getToken();
   return token != null && isTokenValid(token);
