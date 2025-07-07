@@ -239,7 +239,12 @@ const AvailableSpacesTab: React.FC = () => {
       {/* Content Panel */}
       <div className="col-md-9">
         <div className="tab-pane fade show active">
-          <h2 className="text-secondary">Espacios Disponibles</h2>
+          <h2 className="text-secondary">
+            {availableSpacesFilters.getAll 
+              ? `Todos los Espacios (${availableSpaces.length})` 
+              : `Espacios Disponibles (${availableSpaces.length})`
+            }
+          </h2>
           
           <div className="mb-3">
             <label htmlFor="nameLike" className="form-label">Buscar por nombre</label>

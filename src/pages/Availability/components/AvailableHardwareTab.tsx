@@ -226,7 +226,12 @@ const AvailableHardwareTab: React.FC = () => {
       {/* Content Panel */}
       <div className="col-md-9">
         <div className="tab-pane fade show active">
-          <h2 className="text-secondary">Hardware Reservado</h2>
+          <h2 className="text-secondary">
+            {availableHardwareFilters.getAll 
+              ? `Todo el Hardware (${availableHardware.length})` 
+              : `Hardware Disponible (${availableHardware.length})`
+            }
+          </h2>
           
           <div className="mb-3">
             <label htmlFor="nameLike" className="form-label">Buscar por nombre</label>
