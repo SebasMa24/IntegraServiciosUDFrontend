@@ -139,10 +139,10 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const navigationItems = useMemo(() => [
-    { to: "/home", icon: "bi-house-door", label: "Home" },
-    { to: "/troyadev", icon: "bi-code-slash", label: "TroyaDev" },
-    { to: "/reservations", icon: "bi-calendar-check", label: "Reservations" },
-    { to: "/operation", icon: "bi-gear", label: "Operation" }
+    { to: "/home", icon: "bi-house-door", label: "Home", isPublic: true },
+    { to: "/troyadev", icon: "bi-code-slash", label: "TroyaDev", isPublic: true },
+    { to: "/reservations", icon: "bi-calendar-check", label: "Reservations", isPublic: false },
+    { to: "/operation", icon: "bi-gear", label: "Operation", isPublic: false }
   ], []);
 
   const toggleDropdown = useCallback(() => {
@@ -248,19 +248,37 @@ const Navbar: React.FC = () => {
             id="navbarContent"
           >
             <ul className="navbar-nav ms-auto align-items-center" role="menubar">
+              {/* Public navigation items - shown to all users */}
+              {navigationItems
+                .filter(item => item.isPublic)
+                .map((item) => (
+                  <li key={item.to} className="nav-item" role="none">
+                    <NavLink 
+                      to={item.to} 
+                      icon={item.icon}
+                      isActive={location.pathname === item.to}
+                    >
+                      {item.label}
+                    </NavLink>
+                  </li>
+                ))}
+
               {authState.isAuthenticated ? (
                 <>
-                  {navigationItems.map((item) => (
-                    <li key={item.to} className="nav-item" role="none">
-                      <NavLink 
-                        to={item.to} 
-                        icon={item.icon}
-                        isActive={location.pathname === item.to}
-                      >
-                        {item.label}
-                      </NavLink>
-                    </li>
-                  ))}
+                  {/* Private navigation items - only shown to authenticated users */}
+                  {navigationItems
+                    .filter(item => !item.isPublic)
+                    .map((item) => (
+                      <li key={item.to} className="nav-item" role="none">
+                        <NavLink 
+                          to={item.to} 
+                          icon={item.icon}
+                          isActive={location.pathname === item.to}
+                        >
+                          {item.label}
+                        </NavLink>
+                      </li>
+                    ))}
                   
                   {/* User Dropdown */}
                   <li className="nav-item dropdown ms-3" role="none">
