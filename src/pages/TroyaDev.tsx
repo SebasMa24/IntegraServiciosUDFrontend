@@ -11,6 +11,8 @@ const TroyaDev: React.FC = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<number>(0);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [hasAppliedFilters, setHasAppliedFilters] = useState<boolean>(false);
 
   /**
    * Finds available resources based on name, type, and date range.
@@ -101,175 +103,203 @@ const TroyaDev: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("Resources fetched:", allResources);
-    console.log("Bookings fetched:", bookings);
-    console.log("Resource Types fetched:", resourceTypes);
-  }, [allResources, resourceTypes, bookings]);
+    // Show all resources when data is loaded (initial search without filters)
+    if (allResources.length > 0) {
+      setAvailableResources(allResources);
+    }
+  }, [allResources]);
 
-  // Function to handle search and update available resources
+  // Function to get resource type name by ID
+  const getResourceTypeName = (typeId: number): string => {
+    const resourceType = resourceTypes.find(type => type.tire_ID === typeId);
+    return resourceType ? resourceType.tire_NOMBRE : `Tipo ${typeId}`;
+  };
   const handleSearch = () => {
+    // Clear previous errors
+    setError('');
+
+    // Validate dates if any date is provided
+    if (startDate || endDate) {
+      // Check if both dates are provided
+      if (!startDate || !endDate) {
+        setError('Debe proporcionar tanto la fecha de inicio como la fecha de fin para filtrar por disponibilidad.');
+        return;
+      }
+
+      // Check chronological order
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      if (start > end) {
+        setError('La fecha de inicio debe ser anterior o igual a la fecha de fin.');
+        return;
+      }
+    }
+
+    // Mark that filters have been applied
+    setHasAppliedFilters(true);
+
+    // Filter resources by name and type only
+    let filteredResources = allResources.filter(resource => {
+      const nameMatches = searchName === '' || 
+        resource.recu_NOMBRE.toLowerCase().includes(searchName.toLowerCase());
+      const typeMatches = selectedTypeId === 0 || resource.tireid === selectedTypeId;
+      
+      return nameMatches && typeMatches;
+    });
+
+    // Apply availability filter only if both dates are provided
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      const available = findAvailableResources(searchName, selectedTypeId, start, end);
-      setAvailableResources(available);
+      filteredResources = findAvailableResources(searchName, selectedTypeId, start, end);
     }
+
+    setAvailableResources(filteredResources);
   };
 
   return (
     <div className="container mt-4">
-      <h2>TroyaDev Tab</h2>
-      <p> En esta pag va a salir lo de la integración. </p>
+      <h2>Integración con TroyaDevClub</h2>
+      <p className="text-muted">
+        Consulta los recursos disponibles en el sistema de gestión de recursos de TroyaDevClub. 
+        Puedes filtrar por nombre, tipo de recurso y verificar disponibilidad en fechas específicas.
+      </p>
       
-      {/* Search Section */}
-      <div className="card mb-4">
-        <div className="card-header">
-          <h4>Buscar Recursos Disponibles</h4>
-        </div>
-        <div className="card-body">
-          <div className="row">
-            <div className="col-md-3">
-              <label htmlFor="searchName" className="form-label">Nombre del Recurso</label>
-              <input
-                type="text"
-                className="form-control"
-                id="searchName"
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                placeholder="Buscar por nombre..."
-              />
+      <div className="row">
+        {/* Filter Panel */}
+        <div className="col-md-3">
+          <div className="card">
+            <div className="card-header">
+              <h5 className="mb-0">Filtros</h5>
             </div>
-            <div className="col-md-3">
-              <label htmlFor="resourceType" className="form-label">Tipo de Recurso</label>
-              <select
-                className="form-select"
-                id="resourceType"
-                value={selectedTypeId}
-                onChange={(e) => setSelectedTypeId(parseInt(e.target.value))}
-              >
-                <option value={0}>Todos los tipos</option>
-                {resourceTypes.map((type) => (
-                  <option key={type.tire_ID} value={type.tire_ID}>
-                    {type.tire_NOMBRE}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-md-2">
-              <label htmlFor="startDate" className="form-label">Fecha Inicio</label>
-              <input
-                type="date"
-                className="form-control"
-                id="startDate"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <div className="col-md-2">
-              <label htmlFor="endDate" className="form-label">Fecha Fin</label>
-              <input
-                type="date"
-                className="form-control"
-                id="endDate"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
-            <div className="col-md-2 d-flex align-items-end">
-              <button
-                type="button"
-                className="btn btn-primary w-100"
+            <div className="card-body">
+              {error && (
+                <div className="alert alert-danger alert-sm" role="alert">
+                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  <small>{error}</small>
+                </div>
+              )}
+
+              <div className="mb-3">
+                <label htmlFor="searchName" className="form-label">Nombre del Recurso</label>
+                <input
+                  type="text"
+                  className="form-control form-control-sm"
+                  id="searchName"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  placeholder="Buscar por nombre..."
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="resourceType" className="form-label">Tipo de Recurso</label>
+                <select
+                  className="form-select form-select-sm"
+                  id="resourceType"
+                  value={selectedTypeId}
+                  onChange={(e) => setSelectedTypeId(parseInt(e.target.value))}
+                >
+                  <option value={0}>Todos los tipos</option>
+                  {resourceTypes.map((type) => (
+                    <option key={type.tire_ID} value={type.tire_ID}>
+                      {type.tire_NOMBRE}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="startDate" className="form-label">Fecha Inicio</label>
+                <input
+                  type="date"
+                  className="form-control form-control-sm"
+                  id="startDate"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="endDate" className="form-label">Fecha Fin</label>
+                <input
+                  type="date"
+                  className="form-control form-control-sm"
+                  id="endDate"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+
+              <button 
+                type="button" 
+                className="btn btn-primary btn-sm w-100 mb-2"
                 onClick={handleSearch}
-                disabled={!startDate || !endDate}
               >
-                Buscar
+                Aplicar filtros
+              </button>
+
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm w-100"
+                onClick={() => {
+                  setSearchName('');
+                  setSelectedTypeId(0);
+                  setStartDate('');
+                  setEndDate('');
+                  setError('');
+                  setHasAppliedFilters(false);
+                  setAvailableResources(allResources);
+                }}
+              >
+                Limpiar filtros
               </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Available Resources Results */}
-      {availableResources.length > 0 && (
-        <div className="card mb-4">
-          <div className="card-header">
-            <h4>Recursos Disponibles ({availableResources.length})</h4>
-          </div>
-          <div className="card-body">
-            <div className="row">
-              {availableResources.map((resource) => (
-                <div key={resource.recu_ID} className="col-md-6 mb-3">
-                  <div className="card">
-                    <div className="card-body">
-                      <h5 className="card-title">{resource.recu_NOMBRE}</h5>
-                      <p className="card-text">
+        {/* Content Panel */}
+        <div className="col-md-9">
+          <div className="tab-pane fade show active">
+            <h2 className="text-secondary">
+              {(hasAppliedFilters && startDate && endDate) 
+                ? `Recursos Disponibles (${availableResources.length})` 
+                : `Todos los Recursos (${availableResources.length})`
+              }
+            </h2>
+
+            {availableResources.length > 0 ? (
+              <ul className="list-group">
+                {availableResources.map((resource) => (
+                  <li
+                    key={resource.recu_ID}
+                    className="list-group-item"
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <strong>{resource.recu_NOMBRE}</strong> ({getResourceTypeName(resource.tireid)})
+                        <br />
                         <small className="text-muted">
-                          ID: {resource.recu_ID} | Tipo: {resource.tireid} | 
+                          ID: {resource.recu_ID} | 
                           Registro: {new Date(resource.recu_FECHA_REGISTRO).toLocaleDateString()}
                         </small>
-                      </p>
-                      <span className="badge bg-success">Disponible</span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-muted">
+                  {(searchName || selectedTypeId > 0 || (startDate && endDate)) && !error
+                    ? "No se encontraron recursos que coincidan con los criterios de búsqueda especificados."
+                    : "Cargando recursos..."
+                  }
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-      
-      <div className="row">
-        <div className="col-md-6">
-          <h3>Recursos</h3>
-          {allResources.length > 0 ? (
-            <ul className="list-group">
-              {allResources.map((resource) => (
-                <li key={resource.recu_ID} className="list-group-item">
-                  <strong>{resource.recu_NOMBRE}</strong>
-                  <br />
-                  <small className="text-muted">
-                    ID: {resource.recu_ID} | Tipo: {resource.tireid} | 
-                    Registro: {new Date(resource.recu_FECHA_REGISTRO).toLocaleDateString()}
-                  </small>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted">No hay recursos disponibles</p>
-          )}
-        </div>
-        
-        {/* List all bookings */}
-        <div className="col-md-6">
-          <h3>Reservas</h3>
-          {bookings.length > 0 ? (
-            <ul className="list-group">
-              {bookings.map((booking) => (
-                <li key={booking.rese_ID} className="list-group-item">
-                  <strong>{booking.recu_NOMBRE}</strong>
-                  <br />
-                  <span className="text-primary">
-                    {booking.usua_NOMBRES} {booking.usua_APELLIDOS}
-                  </span>
-                  <br />
-                  <small className="text-muted">
-                    Email: {booking.usua_CORREO}
-                  </small>
-                  <br />
-                  <small className="text-muted">
-                    ID Reserva: {booking.rese_ID} | 
-                    Estado: <span className={`badge ${booking.rese_ESTADO === 'ACTIVA' ? 'bg-success' : 'bg-secondary'}`}>
-                      {booking.rese_ESTADO}
-                    </span> | 
-                    Calificación: {booking.rese_CALIFICACION}/5 | 
-                    Registro: {new Date(booking.rese_FECHA_REGISTRO).toLocaleDateString()}
-                  </small>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted">No hay reservas disponibles</p>
-          )}
         </div>
       </div>
     </div>
