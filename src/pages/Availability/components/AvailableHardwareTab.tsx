@@ -14,6 +14,7 @@ const AvailableHardwareTab: React.FC = () => {
   const [nameSearchValue, setNameSearchValue] = React.useState<string>('');
   const [hardwareTypesDomain, setHardwareTypesDomain] = React.useState<string[]>([]);
   const [buildingsDomain, setBuildingsDomain] = React.useState<Array<{code: number, name: string}>>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   // Fetch hardware types and buildings domain data
   React.useEffect(() => {
@@ -33,9 +34,16 @@ const AvailableHardwareTab: React.FC = () => {
   // Fetch available hardware
   useEffect(() => {
     const fetchAvailableHardware = async () => {
-      const response = await getAvailableHardware(availableHardwareFilters);
-      if (response) {
-        setAvailableHardware(response);
+      setIsLoading(true);
+      try {
+        const response = await getAvailableHardware(availableHardwareFilters);
+        if (response) {
+          setAvailableHardware(response);
+        }
+      } catch (error) {
+        console.error('Error fetching available hardware:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -246,26 +254,29 @@ const AvailableHardwareTab: React.FC = () => {
           </div>
 
           <ul className="list-group">
-            {/*
-              {
-                  "code_building": 5,
-                  "code_warehouse": 2,
-                  "code_storedhw": 2,
-                  "name_building": "Edificio 5",
-                  "name_hardware": "Hardware 2",
-                  "type_hardware": "Tipo Hardware 6"
-              }
-            */}
-            {availableHardware.map((shw) => (
-              <li
-                key={`${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`}
-                className="list-group-item list-group-item-action"
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate(`/availability/details/hardware/${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`)}
-              >
-                <strong>{shw.name_hardware}</strong> ({shw.type_hardware}) - {shw.name_building}, almacén {shw.code_warehouse}
+            {isLoading ? (
+              <li className="list-group-item text-center py-4">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Cargando...</span>
+                </div>
+                <p className="text-muted mt-2 mb-0">Cargando hardware...</p>
               </li>
-            ))}
+            ) : availableHardware.length > 0 ? (
+              availableHardware.map((shw) => (
+                <li
+                  key={`${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`}
+                  className="list-group-item list-group-item-action"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/availability/details/hardware/${shw.code_building}-${shw.code_warehouse}-${shw.code_storedhw}`)}
+                >
+                  <strong>{shw.name_hardware}</strong> ({shw.type_hardware}) - {shw.name_building}, almacén {shw.code_warehouse}
+                </li>
+              ))
+            ) : (
+              <li className="list-group-item text-center py-4">
+                <p className="text-muted mb-0">No se encontró hardware que coincida con los criterios de búsqueda.</p>
+              </li>
+            )}
           </ul>
         </div>
       </div>

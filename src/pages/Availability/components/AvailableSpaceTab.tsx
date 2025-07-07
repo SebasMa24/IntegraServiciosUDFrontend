@@ -14,6 +14,7 @@ const AvailableSpacesTab: React.FC = () => {
   const [nameSearchValue, setNameSearchValue] = React.useState<string>('');
   const [spaceTypesDomain, setSpaceTypesDomain] = React.useState<string[]>([]);
   const [buildingsDomain, setBuildingsDomain] = React.useState<Array<{code: number, name: string}>>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   // Fetch space types and buildings domain data
   React.useEffect(() => {
@@ -33,9 +34,16 @@ const AvailableSpacesTab: React.FC = () => {
   // Fetch available spaces
   useEffect(() => {
     const fetchAvailableSpaces = async () => {
-      const response = await getAvailableSpaces(availableSpacesFilters);
-      if (response) {
-        setAvailableSpaces(response);
+      setIsLoading(true);
+      try {
+        const response = await getAvailableSpaces(availableSpacesFilters);
+        if (response) {
+          setAvailableSpaces(response);
+        }
+      } catch (error) {
+        console.error('Error fetching available spaces:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -258,27 +266,30 @@ const AvailableSpacesTab: React.FC = () => {
             />
           </div>
 
-          {/*
-            {
-              "code_building": 1,
-              "code_space": 5,
-              "name_building": "Edificio 1",
-              "name_space": "Espacio 1-5",
-              "type_space": "OFICINA",
-              "capacity_space": 50
-            }
-          */}
           <ul className="list-group">
-            {availableSpaces.map((space) => (
-              <li
-                key={`${space.code_space}-${space.code_building}`}
-                className="list-group-item list-group-item-action"
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate(`/availability/details/space/${space.code_building}-${space.code_space}`)}
-              >
-                <strong>{space.name_space}</strong> ({space.type_space}) - {space.name_building}, Capacidad: {space.capacity_space}
+            {isLoading ? (
+              <li className="list-group-item text-center py-4">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Cargando...</span>
+                </div>
+                <p className="text-muted mt-2 mb-0">Cargando espacios...</p>
               </li>
-            ))}
+            ) : availableSpaces.length > 0 ? (
+              availableSpaces.map((space) => (
+                <li
+                  key={`${space.code_space}-${space.code_building}`}
+                  className="list-group-item list-group-item-action"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/availability/details/space/${space.code_building}-${space.code_space}`)}
+                >
+                  <strong>{space.name_space}</strong> ({space.type_space}) - {space.name_building}, Capacidad: {space.capacity_space}
+                </li>
+              ))
+            ) : (
+              <li className="list-group-item text-center py-4">
+                <p className="text-muted mb-0">No se encontraron espacios que coincidan con los criterios de búsqueda.</p>
+              </li>
+            )}
           </ul>
         </div>
       </div>
