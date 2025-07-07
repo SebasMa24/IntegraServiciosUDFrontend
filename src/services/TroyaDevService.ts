@@ -9,6 +9,13 @@ export interface TroyaDevResource {
     "recu_NOMBRE": string;
 };
 
+export interface TroyaDevResourceType {
+    "tire_ID": number,
+    "tire_DESCRIPCION": string,
+    "tire_FECHA_REGISTRO": Date,
+    "tire_NOMBRE": string
+}
+
 export interface TroyaDevBooking {
     "usua_NOMBRES": string,
     "usua_APELLIDOS": string,
@@ -87,6 +94,22 @@ export async function getAllBookings(): Promise<TroyaDevBooking[]> {
     const response = await troyaDevRequest(
         {
             requestName: "getAllBookings",
+            endpoint: endpoint,
+            method: "GET",
+        },
+        token
+    );
+
+    return response.data;
+}
+
+export async function getAllResourceTypes(): Promise<TroyaDevResourceType[]> {
+    const endpoint = '/' + import.meta.env.VITE_TROYA_DEV_RESOURCE_TYPE_ENDPOINT || '/resource/type/all';
+    const token = await getTroyaDevToken();
+
+    const response = await troyaDevRequest(
+        {
+            requestName: "getAllResourceTypes",
             endpoint: endpoint,
             method: "GET",
         },

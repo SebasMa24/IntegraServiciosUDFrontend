@@ -1,18 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { getAllResources, getAllBookings } from '../services/troyaDevService';
-import type { TroyaDevResource, TroyaDevBooking } from '../services/troyaDevService';
+import { getAllResources, getAllBookings, getAllResourceTypes } from '../services/TroyaDevService';
+import type { TroyaDevResource, TroyaDevBooking, TroyaDevResourceType } from '../services/TroyaDevService';
 
 const TroyaDev: React.FC = () => {
-  const [resources, setResources] = useState<TroyaDevResource[]>([]);
+  const [allResources, setAllResources] = useState<TroyaDevResource[]>([]);
+  const [resourceTypes, setResourceTypes] = useState<TroyaDevResourceType[]>([]);
   const [bookings, setBookings] = useState<TroyaDevBooking[]>([]);
 
   useEffect(() => {
     const fetchResources = async () => {
       try {
         const resourcesData = await getAllResources();
-        setResources(resourcesData);
+        setAllResources(resourcesData);
       } catch (error) {
         console.error("Error fetching resources:", error);
+      }
+    };
+
+    const fetchResourceTypes = async () => {
+      try {
+        const typesData = await getAllResourceTypes();
+        setResourceTypes(typesData);
+      } catch (error) {
+        console.error("Error fetching resource types:", error);
       }
     };
 
@@ -27,12 +37,14 @@ const TroyaDev: React.FC = () => {
 
     fetchResources();
     fetchBookings();
+    fetchResourceTypes();
   }, []);
 
   useEffect(() => {
-    console.log("Resources fetched:", resources);
+    console.log("Resources fetched:", allResources);
     console.log("Bookings fetched:", bookings);
-  }, [resources, bookings]);
+    console.log("Resource Types fetched:", resourceTypes);
+  }, [allResources, resourceTypes, bookings]);
 
   return (
     <div className="container mt-4">
@@ -42,9 +54,9 @@ const TroyaDev: React.FC = () => {
       <div className="row">
         <div className="col-md-6">
           <h3>Recursos</h3>
-          {resources.length > 0 ? (
+          {allResources.length > 0 ? (
             <ul className="list-group">
-              {resources.map((resource) => (
+              {allResources.map((resource) => (
                 <li key={resource.recu_ID} className="list-group-item">
                   <strong>{resource.recu_NOMBRE}</strong>
                   <br />
