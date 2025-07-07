@@ -14,6 +14,7 @@ import StoredHardwareDetails from "./pages/Availability/StoredHardwareDetails";
 import SpaceDetails from "./pages/Availability/SpaceDetails";
 import './App.css';
 import Reservation from "./pages/Reservation";
+import TroyaDev from "./pages/TroyaDev";
 
 const App: React.FC = () => {
   return (
@@ -34,6 +35,7 @@ const App: React.FC = () => {
             <Route path="/availability/details/hardware/:id" element={<StoredHardwareDetails />} />
             <Route path="/availability/details/space/:id" element={<SpaceDetails />} />
             <Route path="/reservations" element={<Reservation />} />
+            <Route path="/troyadev" element={<TroyaDev />} />
           </Routes>
         </main>
         <Footer /> {/* Footer siempre al final */}

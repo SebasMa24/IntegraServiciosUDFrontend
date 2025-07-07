@@ -140,6 +140,7 @@ const Navbar: React.FC = () => {
 
   const navigationItems = useMemo(() => [
     { to: "/home", icon: "bi-house-door", label: "Home" },
+    { to: "/troyadev", icon: "bi-code-slash", label: "TroyaDev" },
     { to: "/reservations", icon: "bi-calendar-check", label: "Reservations" },
     { to: "/operation", icon: "bi-gear", label: "Operation" }
   ], []);
