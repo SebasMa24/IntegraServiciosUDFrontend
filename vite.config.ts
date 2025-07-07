@@ -13,7 +13,18 @@ export default defineConfig(({ mode }) => {
       __OPERATION_API_URL__: JSON.stringify(env.VITE_OPERATION_API_URL),
     },
     server: {
-      port: 5173, // o el que quieras
+      port: 5173,
+    },
+    build: {
+      outDir: 'dist',
+      sourcemap: false, // Desactiva sourcemaps en producción
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            react: ['react', 'react-dom'],
+          },
+        },
+      },
     },
   };
 });
