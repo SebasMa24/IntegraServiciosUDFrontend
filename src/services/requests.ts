@@ -30,9 +30,24 @@ interface RequestOptions {
 export async function userMgmtRequest(
     options: RequestOptions
 ): Promise<any> {
-    const baseUrl = import.meta.env.VITE_USER_API_URL ;
+    const baseUrl = import.meta.env.VITE_USER_API_URL;
     return request(baseUrl, options);
 };
+
+/**
+ * Makes a request to the TroyaDev API.
+ * 
+ * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @returns {Error} If the request fails or if the response cannot be parsed as JSON.
+ * @author Nicolás Sabogal
+ */
+export async function troyaDevRequest(
+    options: RequestOptions,
+    customToken: string | null = null
+): Promise<any> {
+    const baseUrl = import.meta.env.VITE_TROYADEV_API_URL;
+    return request(baseUrl, options, customToken);
+}
 
 /**
  * Makes a request to the operation management API.
@@ -84,13 +99,15 @@ export async function resourceMgmtRequest(
  * 
  * @param baseUrl - The base URL of the API to call.
  * @param options - The options for the request. See {@link RequestOptions} for details.
+ * @param customToken - An optional custom token to use for authorization. If undefined, the function will attempt to retrieve the token from local storage using `getToken()`.
  * @returns Whatever the API endpoint returns, parsed as JSON if the response is of type application/json, else returns the response as text.
  * @throws {Error} If the request fails or if the response cannot be parsed as JSON.
  * @author Nicolás Sabogal
  */
 async function request(
     baseUrl: string,
-    options: RequestOptions
+    options: RequestOptions,
+    customToken?: string | null
 ): Promise<any> {
     // Construct the full URL with parameters.
     let url: string = `${baseUrl}${options.endpoint}`;
@@ -106,7 +123,9 @@ async function request(
 
     // Set up headers for the request.
     let headers: Record<string, string> = {};
-    if (getToken())
+    if (customToken)
+        headers['Authorization'] = `Bearer ${customToken}`;
+    else if (customToken !== null && getToken())
         headers['Authorization'] = `Bearer ${getToken()}`;
     if (options.body && Object.keys(options.body).length > 0)
         headers['Content-Type'] = 'application/json';
