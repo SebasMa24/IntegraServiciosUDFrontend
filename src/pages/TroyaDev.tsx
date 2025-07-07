@@ -160,145 +160,149 @@ const TroyaDev: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Integración con TroyaDevClub</h2>
-      <p className="text-muted">
+      <h1 className="text-primary mb-4">Integración con TroyaDevClub</h1>
+      <p className="lead mb-4">
         Consulta los recursos disponibles en el sistema de gestión de recursos de TroyaDevClub. 
         Puedes filtrar por nombre, tipo de recurso y verificar disponibilidad en fechas específicas.
       </p>
       
-      <div className="row">
-        {/* Filter Panel */}
-        <div className="col-md-3">
-          <div className="card">
-            <div className="card-header">
-              <h5 className="mb-0">Filtros</h5>
-            </div>
-            <div className="card-body">
-              {error && (
-                <div className="alert alert-danger alert-sm" role="alert">
-                  <i className="fas fa-exclamation-triangle me-2"></i>
-                  <small>{error}</small>
+      <div className="card">
+        <div className="card-body">
+          <div className="row">
+            {/* Filter Panel */}
+            <div className="col-md-3">
+              <div className="card">
+                <div className="card-header">
+                  <h5 className="mb-0">Filtros</h5>
                 </div>
-              )}
-
-              <div className="mb-3">
-                <label htmlFor="searchName" className="form-label">Nombre del Recurso</label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  id="searchName"
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
-                  placeholder="Buscar por nombre..."
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="resourceType" className="form-label">Tipo de Recurso</label>
-                <select
-                  className="form-select form-select-sm"
-                  id="resourceType"
-                  value={selectedTypeId}
-                  onChange={(e) => setSelectedTypeId(parseInt(e.target.value))}
-                >
-                  <option value={0}>Todos los tipos</option>
-                  {resourceTypes.map((type) => (
-                    <option key={type.tire_ID} value={type.tire_ID}>
-                      {type.tire_NOMBRE}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="startDate" className="form-label">Fecha Inicio</label>
-                <input
-                  type="date"
-                  className="form-control form-control-sm"
-                  id="startDate"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="endDate" className="form-label">Fecha Fin</label>
-                <input
-                  type="date"
-                  className="form-control form-control-sm"
-                  id="endDate"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
-
-              <button 
-                type="button" 
-                className="btn btn-primary btn-sm w-100 mb-2"
-                onClick={handleSearch}
-              >
-                Aplicar filtros
-              </button>
-
-              <button 
-                type="button" 
-                className="btn btn-secondary btn-sm w-100"
-                onClick={() => {
-                  setSearchName('');
-                  setSelectedTypeId(0);
-                  setStartDate('');
-                  setEndDate('');
-                  setError('');
-                  setHasAppliedFilters(false);
-                  setAvailableResources(allResources);
-                }}
-              >
-                Limpiar filtros
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Content Panel */}
-        <div className="col-md-9">
-          <div className="tab-pane fade show active">
-            <h2 className="text-secondary">
-              {(hasAppliedFilters && startDate && endDate) 
-                ? `Recursos Disponibles (${availableResources.length})` 
-                : `Todos los Recursos (${availableResources.length})`
-              }
-            </h2>
-
-            {availableResources.length > 0 ? (
-              <ul className="list-group">
-                {availableResources.map((resource) => (
-                  <li
-                    key={resource.recu_ID}
-                    className="list-group-item"
-                  >
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <strong>{resource.recu_NOMBRE}</strong> ({getResourceTypeName(resource.tireid)})
-                        <br />
-                        <small className="text-muted">
-                          ID: {resource.recu_ID} | 
-                          Registro: {new Date(resource.recu_FECHA_REGISTRO).toLocaleDateString()}
-                        </small>
-                      </div>
+                <div className="card-body">
+                  {error && (
+                    <div className="alert alert-danger alert-sm" role="alert">
+                      <i className="fas fa-exclamation-triangle me-2"></i>
+                      <small>{error}</small>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-muted">
-                  {(searchName || selectedTypeId > 0 || (startDate && endDate)) && !error
-                    ? "No se encontraron recursos que coincidan con los criterios de búsqueda especificados."
-                    : "Cargando recursos..."
-                  }
-                </p>
+                  )}
+
+                  <div className="mb-3">
+                    <label htmlFor="searchName" className="form-label">Nombre del Recurso</label>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      id="searchName"
+                      value={searchName}
+                      onChange={(e) => setSearchName(e.target.value)}
+                      placeholder="Buscar por nombre..."
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="resourceType" className="form-label">Tipo de Recurso</label>
+                    <select
+                      className="form-select form-select-sm"
+                      id="resourceType"
+                      value={selectedTypeId}
+                      onChange={(e) => setSelectedTypeId(parseInt(e.target.value))}
+                    >
+                      <option value={0}>Todos los tipos</option>
+                      {resourceTypes.map((type) => (
+                        <option key={type.tire_ID} value={type.tire_ID}>
+                          {type.tire_NOMBRE}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="startDate" className="form-label">Fecha Inicio</label>
+                    <input
+                      type="date"
+                      className="form-control form-control-sm"
+                      id="startDate"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="endDate" className="form-label">Fecha Fin</label>
+                    <input
+                      type="date"
+                      className="form-control form-control-sm"
+                      id="endDate"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </div>
+
+                  <button 
+                    type="button" 
+                    className="btn btn-primary btn-sm w-100 mb-2"
+                    onClick={handleSearch}
+                  >
+                    Aplicar filtros
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary btn-sm w-100"
+                    onClick={() => {
+                      setSearchName('');
+                      setSelectedTypeId(0);
+                      setStartDate('');
+                      setEndDate('');
+                      setError('');
+                      setHasAppliedFilters(false);
+                      setAvailableResources(allResources);
+                    }}
+                  >
+                    Limpiar filtros
+                  </button>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Content Panel */}
+            <div className="col-md-9">
+              <div className="tab-pane fade show active">
+                <h2 className="text-secondary">
+                  {(hasAppliedFilters && startDate && endDate) 
+                    ? `Recursos Disponibles (${availableResources.length})` 
+                    : `Todos los Recursos (${availableResources.length})`
+                  }
+                </h2>
+
+                {availableResources.length > 0 ? (
+                  <ul className="list-group">
+                    {availableResources.map((resource) => (
+                      <li
+                        key={resource.recu_ID}
+                        className="list-group-item"
+                      >
+                        <div className="d-flex justify-content-between align-items-start">
+                          <div>
+                            <strong>{resource.recu_NOMBRE}</strong> ({getResourceTypeName(resource.tireid)})
+                            <br />
+                            <small className="text-muted">
+                              ID: {resource.recu_ID} | 
+                              Registro: {new Date(resource.recu_FECHA_REGISTRO).toLocaleDateString()}
+                            </small>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-muted">
+                      {(searchName || selectedTypeId > 0 || (startDate && endDate)) && !error
+                        ? "No se encontraron recursos que coincidan con los criterios de búsqueda especificados."
+                        : "Cargando recursos..."
+                      }
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
