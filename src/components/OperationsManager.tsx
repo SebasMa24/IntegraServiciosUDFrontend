@@ -5,7 +5,7 @@ import { getRoles, isLoggedIn, getSub } from '../services/auth';
 // Tipos para TypeScript
 interface Reservation {
   id?: string;
-  reservationCode?: number; // Agregado
+  reservationCode?: number; 
   building: number;
   resourceCode: number;
   storedResourceCode: number;
@@ -13,11 +13,11 @@ interface Reservation {
   manager: string;
   start: string;
   end: string;
-  handover?: string; // Agregado
-  returnTime?: string; // Agregado
-  conditionRate?: number; // Agregado
-  serviceRate?: number; // Agregado
-  status?: string; // Agregado
+  handover?: string; 
+  returnTime?: string; 
+  conditionRate?: number; 
+  serviceRate?: number; 
+  status?: string; 
 }
 
 interface ReturnData {
@@ -58,6 +58,35 @@ const OperationsManager: React.FC = () => {
     conditionRate: 5,
     serviceRate: 5
   });
+
+  // Función para validar horarios permitidos (7:00 AM - 6:59 PM)
+  const isValidTime = (dateTimeString: string): boolean => {
+    const date = new Date(dateTimeString);
+    const hours = date.getHours();
+    return hours >= 7 && hours < 19; // 7:00 AM hasta 18:59 PM
+  };
+
+  // Función para validar el rango de fechas
+  const validateTimeRange = (start: string, end: string): string | null => {
+    if (!start || !end) return null;
+    
+    if (!isValidTime(start)) {
+      return 'La hora de inicio debe estar entre las 7:00 AM y 6:59 PM';
+    }
+    
+    if (!isValidTime(end)) {
+      return 'La hora de fin debe estar entre las 7:00 AM y 6:59 PM';
+    }
+    
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    if (startDate >= endDate) {
+      return 'La fecha de inicio debe ser anterior a la fecha de fin';
+    }
+    
+    return null;
+  };
 
   // Verificar roles del usuario
   useEffect(() => {
@@ -172,6 +201,14 @@ const OperationsManager: React.FC = () => {
   // Crear nueva reserva
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar horarios antes de enviar
+    const timeValidationError = validateTimeRange(formData.start, formData.end);
+    if (timeValidationError) {
+      showMessage(timeValidationError, 'error');
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -417,6 +454,11 @@ const OperationsManager: React.FC = () => {
                   <div>
                     <h2 className="card-title mb-4">Nueva Reserva de Hardware</h2>
                     
+                    {/* Mensaje informativo sobre horarios */}
+                    <div className="alert alert-info mb-4">
+                      <strong>📅 Horarios Permitidos:</strong> Las reservas solo pueden realizarse entre las 7:00 AM y 6:59 PM
+                    </div>
+                    
                     <form onSubmit={handleSubmit}>
                       <div className="row g-3">
                         <div className="col-md-6">
@@ -500,6 +542,9 @@ const OperationsManager: React.FC = () => {
                             onChange={(e) => setFormData({...formData, start: e.target.value})}
                             required
                           />
+                          <small className="form-text text-muted">
+                            Solo entre 7:00 AM - 6:59 PM
+                          </small>
                         </div>
                         
                         <div className="col-md-6">
@@ -511,6 +556,9 @@ const OperationsManager: React.FC = () => {
                             onChange={(e) => setFormData({...formData, end: e.target.value})}
                             required
                           />
+                          <small className="form-text text-muted">
+                            Solo entre 7:00 AM - 6:59 PM
+                          </small>
                         </div>
                       </div>
                       

@@ -90,6 +90,32 @@ const SpaceOperationsManager: React.FC = () => {
     return userRoles.includes('ROLE_USER') && !userRoles.includes('ROLE_ADMIN');
   };
 
+  // Función para validar horarios permitidos (7:00 AM - 6:59 PM)
+  const isValidTime = (dateTime: string): boolean => {
+    const date = new Date(dateTime);
+    const hours = date.getHours();
+    return hours >= 7 && hours <= 18;
+  };
+
+  // Función para validar que ambas fechas estén en horario permitido
+  const validateTimeRange = (start: string, end: string): { valid: boolean; message: string } => {
+    if (!start || !end) {
+      return { valid: false, message: 'Ambas fechas son requeridas' };
+    }
+
+    const startValid = isValidTime(start);
+    const endValid = isValidTime(end);
+
+    if (!startValid || !endValid) {
+      return { 
+        valid: false, 
+        message: 'Las reservas solo están permitidas entre las 7:00 AM y las 6:59 PM' 
+      };
+    }
+
+    return { valid: true, message: '' };
+  };
+
   //Función para obtener el color del badge según el status
   const getStatusBadgeClass = (status?: string): string => {
     switch (status?.toLowerCase()) {
@@ -173,6 +199,14 @@ const SpaceOperationsManager: React.FC = () => {
     setLoading(true);
     
     try {
+      // Validar horarios antes de enviar
+      const timeValidation = validateTimeRange(formData.start, formData.end);
+      if (!timeValidation.valid) {
+        showMessage(timeValidation.message, 'error');
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         ...formData,
         building: Number(formData.building),
@@ -332,6 +366,9 @@ const SpaceOperationsManager: React.FC = () => {
         <div className="col-12 text-center">
           <h1 className="display-4 text-primary mb-2">Sistema de Reservas de Espacios</h1>
           <p className="lead text-muted">Gestiona las reservas y disponibilidad de espacios</p>
+          <div className="alert alert-info">
+            <strong>Horarios permitidos:</strong> Las reservas solo están disponibles de 7:00 AM a 6:59 PM
+          </div>
           {isAdmin() && (
             <div className="badge bg-success">Administrador</div>
           )}
@@ -486,6 +523,9 @@ const SpaceOperationsManager: React.FC = () => {
                             onChange={(e) => setFormData({...formData, start: e.target.value})}
                             required
                           />
+                          <small className="form-text text-muted">
+                            Horario permitido: 7:00 AM - 6:59 PM
+                          </small>
                         </div>
                         
                         <div className="col-md-6">
@@ -497,6 +537,9 @@ const SpaceOperationsManager: React.FC = () => {
                             onChange={(e) => setFormData({...formData, end: e.target.value})}
                             required
                           />
+                          <small className="form-text text-muted">
+                            Horario permitido: 7:00 AM - 6:59 PM
+                          </small>
                         </div>
                       </div>
                       
