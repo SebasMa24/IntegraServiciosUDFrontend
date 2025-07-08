@@ -87,8 +87,8 @@ const AvailableSpacesTab: React.FC = () => {
   };
 
   const handleDateChange = (date: string) => {
-    const startTime = getTimeFromISO(availableSpacesFiltersForm.startDate) || '00:00';
-    const endTime = getTimeFromISO(availableSpacesFiltersForm.endDate) || '23:59';
+    const startTime = getTimeFromISO(availableSpacesFiltersForm.startDate) || '07:00';
+    const endTime = getTimeFromISO(availableSpacesFiltersForm.endDate) || '18:59';
     
     const filters = {
       ...availableSpacesFiltersForm,
@@ -112,10 +112,16 @@ const AvailableSpacesTab: React.FC = () => {
 
     // garantee that both startDate and endDate are set
     if (filters.startDate && !filters.endDate) {
-      filters.endDate = createISOStringFromDateTime(date, '23:59');
+      filters.endDate = createISOStringFromDateTime(date, '18:59');
     } else if (!filters.startDate && filters.endDate) {
-      filters.startDate = createISOStringFromDateTime(date, '00:00');
+      filters.startDate = createISOStringFromDateTime(date, '07:00');
     }
+
+    // garantee that startDate is not before 7:00 and endDate is not after 18:59
+    if (filters.startDate && new Date(filters.startDate).getHours() < 7)
+      filters.startDate = createISOStringFromDateTime(date, '07:00');
+    if (filters.endDate && new Date(filters.endDate).getHours() >= 19)
+      filters.endDate = createISOStringFromDateTime(date, '18:59');
 
     // garantee that startDate is before endDate
     if (filters.startDate && filters.endDate && new Date(filters.startDate) > new Date(filters.endDate)) {
