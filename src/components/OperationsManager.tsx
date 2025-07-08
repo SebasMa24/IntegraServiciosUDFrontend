@@ -582,7 +582,7 @@ const OperationsManager: React.FC = () => {
                                 {/* Botón de eliminar solo para admin */}
                                 {isAdmin() && (
                                   <button
-                                    onClick={() => handleDelete(reservation.id || String(index + 1))}
+                                    onClick={() => handleDelete(reservation.id!)}
                                     className="btn btn-outline-danger btn-sm"
                                   >
                                     🗑️ Eliminar
