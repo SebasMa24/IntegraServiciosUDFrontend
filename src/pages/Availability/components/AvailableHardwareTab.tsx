@@ -117,11 +117,21 @@ const AvailableHardwareTab: React.FC = () => {
       filters.startDate = createISOStringFromDateTime(date, '07:00');
     }
 
-    // garantee that StartDate is not before 7:00 and EndDate is not after 18:59
-    if (filters.startDate && new Date(filters.startDate).getHours() < 7)
-      filters.startDate = createISOStringFromDateTime(date, '07:00');
-    if (filters.endDate && new Date(filters.endDate).getHours() >= 19)
-      filters.endDate = createISOStringFromDateTime(date, '18:59');
+    // ensure that startDate is within allowed time range
+    if (filters.startDate) {
+      if (filters.startDate < createISOStringFromDateTime(date, '07:00'))
+        filters.startDate = createISOStringFromDateTime(date, '07:00');
+      if (filters.startDate >= createISOStringFromDateTime(date, '19:00'))
+        filters.startDate = createISOStringFromDateTime(date, '18:59');
+    }
+
+    // ensure that endDate is within allowed time range
+    if (filters.endDate) {
+      if (filters.endDate < createISOStringFromDateTime(date, '07:00'))
+        filters.endDate = createISOStringFromDateTime(date, '07:00');
+      if (filters.endDate >= createISOStringFromDateTime(date, '19:00'))
+        filters.endDate = createISOStringFromDateTime(date, '18:59');
+    }
 
     // garantee that startDate is before endDate
     if (filters.startDate && filters.endDate && new Date(filters.startDate) > new Date(filters.endDate)) {
