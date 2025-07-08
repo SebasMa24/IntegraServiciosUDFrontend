@@ -71,7 +71,10 @@ const AvailableSpacesTab: React.FC = () => {
   }, [searchDebounceTimeout]);
 
   const handleFilterFormChange = (key: keyof SpaceRequestOptions, value: any) => {
-    let filters = {...availableSpacesFiltersForm, [key]: value };
+    let filters = {
+      ...availableSpacesFiltersForm,
+      [key]: value === '' ? undefined : value
+    };
 
     // Set getAll based on date availability
     if (!filters.startDate && !filters.endDate) {

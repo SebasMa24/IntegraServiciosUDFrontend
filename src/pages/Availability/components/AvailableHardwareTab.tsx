@@ -71,7 +71,10 @@ const AvailableHardwareTab: React.FC = () => {
   }, [searchDebounceTimeout]);
 
   const handleFilterFormChange = (key: keyof HardwareRequestOptions, value: any) => {
-    let filters = {...availableHardwareFiltersForm, [key]: value };
+    let filters = {
+      ...availableHardwareFiltersForm,
+      [key]: value === '' ? undefined : value
+    };
 
     // Set getAll based on date availability
     if (!filters.startDate && !filters.endDate) {
