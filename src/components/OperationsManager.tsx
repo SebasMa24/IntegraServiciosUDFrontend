@@ -474,7 +474,7 @@ const OperationsManager: React.FC = () => {
                         </div>
                         
                         <div className="col-md-6">
-                          <label className="form-label">Código de Recurso</label>
+                          <label className="form-label">Código de Almacen</label>
                           <input
                             type="number"
                             className="form-control"
